@@ -1,36 +1,121 @@
 "use client";
 
-import { Building2, HardHat, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { HardHat, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/app/lib/supabase/client";
 
 export default function LoginObraPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkSession() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!isMounted) return;
+
+      if (session) {
+        router.replace("/dashboard");
+        return;
+      }
+
+      setCheckingSession(false);
+    }
+
+    checkSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        router.replace("/dashboard");
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: senha,
+    });
+
+    if (error) {
+      setError("E-mail ou senha inválidos.");
+      setLoading(false);
+      return;
+    }
+
+    router.replace("/dashboard");
+  }
+
+  if (checkingSession) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#080808] text-white">
+        <p className="text-sm text-white/70">Carregando...</p>
+      </main>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-[#181818] text-white">
+    <main className="min-h-screen bg-[#080808] text-white">
       <div className="grid min-h-screen lg:grid-cols-2">
-        {/* Branding - aparece só no desktop */}
-        <section className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-[#121212] p-10 xl:p-14">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.14),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(234,88,12,0.10),transparent_35%)]" />
+        {/* Branding - desktop */}
+        <section className="relative hidden overflow-hidden border-r border-white/5 bg-[#080808] lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,80,23,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_28%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.025),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
 
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
-                <Building2 className="h-5 w-5" />
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">
+              Plataforma
+            </p>
+
+            <div className="mt-3 flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/25 blur-lg" />
+                <img
+                  src="/logomorais.svg"
+                  alt="Morais Construtora"
+                  className="relative h-14 w-auto"
+                />
               </div>
+
               <div>
-                <p className="text-sm text-white/60">Plataforma</p>
-                <h1 className="text-lg font-semibold tracking-wide">ObraControl</h1>
+                <h1 className="text-2xl font-extrabold leading-none text-white">
+                  Brick Morais
+                </h1>
+                <p className="mt-1 text-sm text-white/60">Gestão de obras</p>
               </div>
             </div>
 
-            <div className="mt-16 max-w-xl">
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-orange-400">
+            <div className="mt-20 max-w-xl">
+              <p className="text-sm font-medium uppercase tracking-[0.28em] text-[#FF8A63]">
                 Gestão de Obras
               </p>
 
-              <h2 className="mt-4 text-4xl font-bold leading-tight xl:text-5xl">
+              <h2 className="mt-5 text-4xl font-bold leading-tight text-white xl:text-5xl">
                 Controle sua obra com mais organização, clareza e resultado.
               </h2>
 
-              <p className="mt-6 max-w-lg text-base leading-7 text-white/70">
+              <p className="mt-6 max-w-lg text-base leading-7 text-white/62">
                 Acompanhe custos, equipes, etapas, materiais e andamento da obra
                 em um só lugar. Uma plataforma moderna para construtoras,
                 engenheiros e gestores.
@@ -39,73 +124,111 @@ export default function LoginObraPage() {
           </div>
 
           <div className="relative z-10 grid gap-4">
-            <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-              <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
-                <HardHat className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Acompanhamento em tempo real</h3>
-                <p className="mt-1 text-sm leading-6 text-white/65">
-                  Visualize status da obra, produtividade da equipe e evolução de cada etapa.
-                </p>
+            <div className="relative overflow-hidden rounded-[28px] border border-white/5 bg-[#252525] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.10),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_70%)]" />
+
+              <div className="relative z-10 flex items-start gap-4">
+                <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#080808] shadow-[0_10px_24px_rgba(255,255,255,0.10)]">
+                  <HardHat className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">
+                    Acompanhamento em tempo real
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-white/60">
+                    Visualize status da obra, produtividade da equipe e evolução
+                    de cada etapa.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-              <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Dados centralizados e seguros</h3>
-                <p className="mt-1 text-sm leading-6 text-white/65">
-                  Gerencie informações importantes da operação com segurança e praticidade.
-                </p>
+            <div className="relative overflow-hidden rounded-[28px] border border-white/5 bg-[#252525] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_70%)]" />
+
+              <div className="relative z-10 flex items-start gap-4">
+                <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#080808] shadow-[0_10px_24px_rgba(255,255,255,0.10)]">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">
+                    Dados centralizados e seguros
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-white/60">
+                    Gerencie informações importantes da operação com segurança e
+                    praticidade.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Login */}
-        <section className="flex items-center justify-center p-6 sm:p-8 lg:p-10">
-          <div className="w-full max-w-md">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-md sm:p-8">
-              <div className="mb-8 lg:hidden">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/15 text-orange-400">
-                  <Building2 className="h-6 w-6" />
+        <section className="relative flex items-center justify-center bg-[#080808] p-6 sm:p-8 lg:p-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.10),transparent_28%)]" />
+
+          <div className="relative z-10 w-full max-w-md">
+            <div className="relative overflow-hidden rounded-[32px] border border-white/5 bg-[#252525] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)] sm:p-8">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.12),transparent_38%),linear-gradient(to_bottom,rgba(255,255,255,0.04),transparent_32%,transparent_75%,rgba(255,255,255,0.015))]" />
+
+              <div className="relative z-10 mb-8 lg:hidden">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="relative">
+                    <div className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/20 blur-lg" />
+                    <img
+                      src="/logomorais.svg"
+                      alt="Morais Construtora"
+                      className="relative h-10 w-auto"
+                    />
+                  </div>
+
+                  <div>
+                    <h1 className="text-lg font-extrabold leading-none text-white">
+                      Brick Morais
+                    </h1>
+                    <p className="mt-1 text-xs text-white/60">Gestão de obras</p>
+                  </div>
                 </div>
-                <h1 className="text-2xl font-bold">Acessar plataforma</h1>
-                <p className="mt-2 text-sm leading-6 text-white/65">
+
+                <h2 className="text-2xl font-bold text-white">
+                  Acessar plataforma
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-white/60">
                   Entre para gerenciar suas obras com mais controle e eficiência.
                 </p>
               </div>
 
-              <div className="hidden lg:block mb-8">
-                <h1 className="text-3xl font-bold">Entrar</h1>
-                <p className="mt-2 text-sm leading-6 text-white/65">
+              <div className="relative z-10 mb-8 hidden lg:block">
+                <h1 className="text-3xl font-bold text-white">Entrar</h1>
+                <p className="mt-2 text-sm leading-6 text-white/60">
                   Acesse sua conta para continuar.
                 </p>
               </div>
 
-              <form className="space-y-5">
+              <form className="relative z-10 space-y-5" onSubmit={handleLogin}>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-white/85">
+                  <label className="mb-2 block text-sm font-medium text-white/82">
                     E-mail
                   </label>
                   <input
                     type="email"
                     placeholder="seuemail@empresa.com"
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-[#202020] px-4 text-white placeholder:text-white/30 outline-none transition focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-13 w-full rounded-2xl border border-white/8 bg-[#161616] px-4 text-white placeholder:text-white/25 outline-none transition focus:border-[#FF5017]/60 focus:ring-2 focus:ring-[#FF5017]/20"
+                    required
                   />
                 </div>
 
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <label className="block text-sm font-medium text-white/85">
+                    <label className="block text-sm font-medium text-white/82">
                       Senha
                     </label>
                     <button
                       type="button"
-                      className="text-sm text-orange-400 transition hover:text-orange-300"
+                      className="text-sm font-medium text-[#FF8A63] transition hover:text-[#FFB197]"
                     >
                       Esqueci minha senha
                     </button>
@@ -114,19 +237,29 @@ export default function LoginObraPage() {
                   <input
                     type="password"
                     placeholder="••••••••"
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-[#202020] px-4 text-white placeholder:text-white/30 outline-none transition focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20"
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    className="h-13 w-full rounded-2xl border border-white/8 bg-[#161616] px-4 text-white placeholder:text-white/25 outline-none transition focus:border-[#FF5017]/60 focus:ring-2 focus:ring-[#FF5017]/20"
+                    required
                   />
                 </div>
 
+                {error ? (
+                  <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                    {error}
+                  </div>
+                ) : null}
+
                 <button
                   type="submit"
-                  className="h-12 w-full rounded-2xl bg-orange-500 font-semibold text-white transition hover:bg-orange-600"
+                  disabled={loading}
+                  className="h-13 w-full rounded-2xl bg-[#FF5017] font-semibold text-white shadow-[0_12px_30px_rgba(255,80,23,0.32)] transition hover:scale-[1.01] hover:bg-[#ff612e] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Entrar na plataforma
+                  {loading ? "Entrando..." : "Entrar na plataforma"}
                 </button>
               </form>
 
-              <div className="mt-6 text-center text-sm text-white/50">
+              <div className="relative z-10 mt-6 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-center text-sm text-white/45">
                 Acesso restrito para administradores e equipe autorizada.
               </div>
             </div>
