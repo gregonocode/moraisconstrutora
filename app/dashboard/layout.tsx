@@ -1,7 +1,13 @@
-// app/dashboard/layout.tsx
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { useMemo, useState, type ReactNode } from "react";
 import {
+  Blocks,
+  Box,
+  BriefcaseBusiness,
+  ChevronDown,
   ChevronRight,
   ClipboardList,
   FolderKanban,
@@ -10,7 +16,10 @@ import {
   Package,
   Receipt,
   ShoppingCart,
+  UserCog,
   Users,
+  Wrench,
+  BadgeDollarSign,
 } from "lucide-react";
 import { DashboardLogoutButton } from "@/app/components/DashboardLogoutButton";
 
@@ -18,7 +27,7 @@ type DashboardLayoutProps = {
   children: ReactNode;
 };
 
-const menuItems = [
+const mainMenu = [
   {
     label: "Dashboard",
     href: "/dashboard",
@@ -52,7 +61,7 @@ const menuItems = [
   {
     label: "Estoque",
     href: "/dashboard/estoque",
-    icon: Package,
+    icon: Box,
   },
   {
     label: "Equipe",
@@ -61,14 +70,66 @@ const menuItems = [
   },
 ];
 
+const recursosMenu = [
+  {
+    label: "Materiais",
+    href: "/dashboard/cadastros/recursos/materiais",
+    icon: Package,
+  },
+  {
+    label: "Mão de obra",
+    href: "/dashboard/cadastros/recursos/mao-de-obra",
+    icon: Users,
+  },
+  {
+    label: "Cargo / Função",
+    href: "/dashboard/cadastros/recursos/cargos",
+    icon: UserCog,
+  },
+  {
+    label: "Fornecedores",
+    href: "/dashboard/cadastros/recursos/fornecedores",
+    icon: BriefcaseBusiness,
+  },
+  {
+    label: "Equipamentos",
+    href: "/dashboard/cadastros/recursos/equipamentos",
+    icon: Wrench,
+  },
+  {
+    label: "Serviços",
+    href: "/dashboard/cadastros/recursos/servicos",
+    icon: Blocks,
+  },
+  
+];
+
 export default function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const isCadastrosRoute = pathname.startsWith("/dashboard/cadastros");
+  const isRecursosRoute = pathname.startsWith("/dashboard/cadastros/recursos");
+
+  const [cadastrosOpen, setCadastrosOpen] = useState(isCadastrosRoute);
+  const [recursosOpen, setRecursosOpen] = useState(isRecursosRoute);
+
+  const recursosActive = useMemo(
+    () => recursosMenu.some((item) => isActive(item.href)),
+    [pathname]
+  );
+
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#0b0b0c] text-white">
       <div className="flex min-h-dvh w-full overflow-x-hidden">
         {/* Sidebar desktop */}
-        <aside className="hidden w-[290px] shrink-0 border-r border-white/8 bg-[#0f0f10] lg:flex lg:flex-col">
+        <aside className="hidden w-[310px] shrink-0 border-r border-white/8 bg-[#0f0f10] lg:flex lg:flex-col">
           <div className="relative overflow-hidden border-b border-white/8 px-6 py-6">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,96,26,0.16),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(255,96,26,0.08),transparent_30%)]" />
 
@@ -90,7 +151,7 @@ export default function DashboardLayout({
 
                   <div className="min-w-0">
                     <h1 className="text-2xl font-black leading-none text-white">
-                      Brick Morais
+                      Morais Control
                     </h1>
                     <p className="mt-1 text-sm text-white/60">
                       Gestão de obras
@@ -114,32 +175,150 @@ export default function DashboardLayout({
             </div>
           </div>
 
-          <div className="flex-1 px-4 py-5">
+          <div className="flex-1 overflow-y-auto px-4 py-5">
             <p className="mb-3 px-3 text-[11px] uppercase tracking-[0.24em] text-white/35">
               Menu
             </p>
 
             <nav className="space-y-2">
-              {menuItems.map((item) => {
+              {mainMenu.map((item) => {
                 const Icon = item.icon;
+                const active = isActive(item.href);
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="group flex items-center justify-between rounded-2xl border border-transparent px-3 py-3 text-sm text-white/70 transition hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+                    className={`group flex items-center justify-between rounded-2xl border px-3 py-3 text-sm transition ${
+                      active
+                        ? "border-[#FF5017]/30 bg-[#FF5017]/10 text-white"
+                        : "border-transparent text-white/70 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+                    }`}
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/[0.04] text-white/70 transition group-hover:bg-orange-500/15 group-hover:text-orange-400">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition ${
+                          active
+                            ? "bg-[#FF5017] text-white"
+                            : "bg-white/[0.04] text-white/70 group-hover:bg-orange-500/15 group-hover:text-orange-400"
+                        }`}
+                      >
                         <Icon className="h-5 w-5" />
                       </div>
                       <span className="truncate font-medium">{item.label}</span>
                     </div>
 
-                    <ChevronRight className="h-4 w-4 shrink-0 text-white/20 transition group-hover:text-white/45" />
+                    <ChevronRight
+                      className={`h-4 w-4 shrink-0 transition ${
+                        active
+                          ? "text-white/70"
+                          : "text-white/20 group-hover:text-white/45"
+                      }`}
+                    />
                   </Link>
                 );
               })}
+
+              {/* Cadastros retrátil */}
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setCadastrosOpen((prev) => !prev)}
+                  className={`group flex w-full items-center justify-between rounded-2xl border px-3 py-3 text-sm transition ${
+                    isCadastrosRoute
+                      ? "border-[#FF5017]/20 bg-[#FF5017]/8 text-white"
+                      : "border-transparent text-white/70 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+                  }`}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition ${
+                        isCadastrosRoute
+                          ? "bg-[#FF5017] text-white"
+                          : "bg-white/[0.04] text-white/70 group-hover:bg-orange-500/15 group-hover:text-orange-400"
+                      }`}
+                    >
+                      <Blocks className="h-5 w-5" />
+                    </div>
+                    <span className="truncate font-medium">Cadastros</span>
+                  </div>
+
+                  {cadastrosOpen ? (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-white/55" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 shrink-0 text-white/35" />
+                  )}
+                </button>
+
+                {cadastrosOpen && (
+                  <div className="ml-4 space-y-2 border-l border-white/6 pl-3">
+                    {/* Recursos retrátil */}
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setRecursosOpen((prev) => !prev)}
+                        className={`group flex w-full items-center justify-between rounded-2xl border px-3 py-2.5 text-sm transition ${
+                          recursosActive
+                            ? "border-[#FF5017]/20 bg-[#FF5017]/8 text-white"
+                            : "border-transparent text-white/65 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+                        }`}
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition ${
+                              recursosActive
+                                ? "bg-[#FF5017] text-white"
+                                : "bg-white/[0.04] text-white/60 group-hover:text-orange-300"
+                            }`}
+                          >
+                            <Package className="h-4 w-4" />
+                          </div>
+                          <span className="truncate">Recursos</span>
+                        </div>
+
+                        {recursosOpen ? (
+                          <ChevronDown className="h-4 w-4 shrink-0 text-white/55" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 shrink-0 text-white/35" />
+                        )}
+                      </button>
+
+                      {recursosOpen && (
+                        <div className="ml-4 space-y-1 border-l border-white/6 pl-3">
+                          {recursosMenu.map((item) => {
+                            const Icon = item.icon;
+                            const active = isActive(item.href);
+
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition ${
+                                  active
+                                    ? "bg-[#FF5017]/12 text-white"
+                                    : "text-white/65 hover:bg-white/[0.04] hover:text-white"
+                                }`}
+                              >
+                                <div
+                                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition ${
+                                    active
+                                      ? "bg-[#FF5017] text-white"
+                                      : "bg-white/[0.04] text-white/60 group-hover:text-orange-300"
+                                  }`}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                </div>
+
+                                <span className="truncate">{item.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </nav>
           </div>
 
@@ -157,7 +336,6 @@ export default function DashboardLayout({
 
         {/* Conteúdo */}
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col overflow-x-hidden">
-          {/* Topbar */}
           <header className="sticky top-0 z-30 border-b border-white/8 bg-[#0b0b0c]/90 backdrop-blur-xl">
             <div className="flex min-h-[68px] w-full min-w-0 items-center justify-between gap-3 px-4 py-3 sm:min-h-[76px] sm:px-6 lg:px-8">
               <div className="min-w-0 flex-1">
@@ -181,7 +359,6 @@ export default function DashboardLayout({
             </div>
           </header>
 
-          {/* Bloco de marca mobile */}
           <div className="border-b border-white/8 px-4 py-4 lg:hidden">
             <div className="flex min-w-0 items-center gap-3">
               <div className="relative shrink-0">
@@ -195,40 +372,17 @@ export default function DashboardLayout({
 
               <div className="min-w-0">
                 <h2 className="truncate text-base font-black leading-none text-white">
-                  Brick Morais
+                  Morais Control
                 </h2>
                 <p className="mt-1 text-xs text-white/60">Gestão de obras</p>
               </div>
             </div>
           </div>
 
-          {/* Menu mobile */}
-          <div className="border-b border-white/8 px-4 py-3 lg:hidden">
-            <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <div className="flex w-max gap-2 pb-1">
-                {menuItems.map((item) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 text-sm text-white/70 transition hover:border-orange-500/30 hover:bg-orange-500/10 hover:text-orange-300"
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span className="whitespace-nowrap">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <main className="flex-1 min-w-0 overflow-x-hidden px-2.5 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
+          <main className="min-w-0 flex-1 overflow-x-hidden px-2.5 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
             {children}
           </main>
 
-          {/* Ações mobile */}
           <div className="border-t border-white/8 p-4 lg:hidden">
             <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.025))] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-md">
               <p className="text-sm font-semibold text-white">Tiago Oliveira</p>

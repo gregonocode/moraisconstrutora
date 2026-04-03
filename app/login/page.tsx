@@ -1,52 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { HardHat, ShieldCheck } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabase/client";
+import { useSearchParams } from "next/navigation";
+import { createClient } from "@/app/lib/supabase/client";
 
 export default function LoginObraPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const supabase = createClient();
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function checkSession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!isMounted) return;
-
-      if (session) {
-        router.replace("/dashboard");
-        return;
-      }
-
-      setCheckingSession(false);
-    }
-
-    checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        router.replace("/dashboard");
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [router]);
+  const nextPath = useMemo(() => {
+    const next = searchParams.get("next");
+    if (next && next.startsWith("/")) return next;
+    return "/dashboard";
+  }, [searchParams]);
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,21 +36,12 @@ export default function LoginObraPage() {
       return;
     }
 
-    router.replace("/dashboard");
-  }
-
-  if (checkingSession) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#080808] text-white">
-        <p className="text-sm text-white/70">Carregando...</p>
-      </main>
-    );
+    window.location.assign(nextPath);
   }
 
   return (
     <main className="min-h-screen bg-[#080808] text-white">
       <div className="grid min-h-screen lg:grid-cols-2">
-        {/* Branding - desktop */}
         <section className="relative hidden overflow-hidden border-r border-white/5 bg-[#080808] lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,80,23,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_28%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.025),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
@@ -100,7 +63,7 @@ export default function LoginObraPage() {
 
               <div>
                 <h1 className="text-2xl font-extrabold leading-none text-white">
-                  Brick Morais
+                  Morais Control
                 </h1>
                 <p className="mt-1 text-sm text-white/60">Gestão de obras</p>
               </div>
@@ -164,7 +127,6 @@ export default function LoginObraPage() {
           </div>
         </section>
 
-        {/* Login */}
         <section className="relative flex items-center justify-center bg-[#080808] p-6 sm:p-8 lg:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.10),transparent_28%)]" />
 
@@ -185,7 +147,7 @@ export default function LoginObraPage() {
 
                   <div>
                     <h1 className="text-lg font-extrabold leading-none text-white">
-                      Brick Morais
+                      Morais Control
                     </h1>
                     <p className="mt-1 text-xs text-white/60">Gestão de obras</p>
                   </div>

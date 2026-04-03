@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Brick Morais",
+  title: "Morais Control",
   description: "Sistema de gestão de obras da Morais Construtora.",
-  applicationName: "Brick Morais",
+  applicationName: "Morais Control",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Brick Morais",
+    title: "Morais Control",
   },
 };
 

@@ -3,10 +3,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Brick Morais",
-    short_name: "Brick Morais",
+    name: "Morais Control",
+    short_name: "Morais Control",
     description: "Sistema de gestão de obras da Morais Construtora.",
-    start_url: "/login",
+    start_url: "/dashboard",
     scope: "/",
     display: "standalone",
     orientation: "portrait",

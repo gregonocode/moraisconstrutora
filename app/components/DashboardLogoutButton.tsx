@@ -1,21 +1,18 @@
-// app/components/DashboardLogoutButton.tsx
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { supabase } from "@/app/lib/supabase/client";
+import { createClient } from "@/app/lib/supabase/client";
 
 export function DashboardLogoutButton() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const supabase = createClient();
 
   async function handleLogout() {
     try {
       setLoading(true);
       await supabase.auth.signOut();
-      router.replace("/login");
-      router.refresh();
+      window.location.assign("/login");
     } finally {
       setLoading(false);
     }

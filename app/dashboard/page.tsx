@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import {
   ArrowUpRight,
   ClipboardList,
@@ -8,8 +9,9 @@ import {
   TriangleAlert,
   Users,
   Clock,
-  MoreVertical
+  MoreVertical,
 } from "lucide-react";
+import { createClient } from "@/app/lib/supabase/server";
 
 const obrasRecentes = [
   {
@@ -53,10 +55,20 @@ const comprasPendentes = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    redirect("/login?next=/dashboard");
+  }
+
   return (
     <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:space-y-8 lg:p-8">
-      {/* Hero */}
       <section className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-5 shadow-2xl sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,80,23,0.14),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.03),transparent_42%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05),transparent_28%,transparent_72%,rgba(255,255,255,0.02))]" />
@@ -64,7 +76,7 @@ export default function DashboardPage() {
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#FF5017]/25 bg-[#FF5017]/10 px-3 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#FF5017] animate-pulse" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#FF5017]" />
               <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#FF8A63] sm:text-xs">
                 Visão geral
               </p>
@@ -89,7 +101,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Cards principais */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
         <StatCard
           icon={<HardHat className="h-5 w-5" />}
@@ -118,9 +129,7 @@ export default function DashboardPage() {
         />
       </section>
 
-      {/* Grid central */}
       <section className="grid grid-cols-1 gap-4 lg:gap-6 xl:grid-cols-[1.35fr_0.9fr]">
-        {/* Obras Recentes */}
         <div className="relative flex flex-col overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_30%,transparent_70%,rgba(255,255,255,0.015))]" />
 
@@ -145,7 +154,9 @@ export default function DashboardPage() {
                   <h4 className="line-clamp-1 text-base font-medium text-white">
                     {obra.nome}
                   </h4>
-                  <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${obra.statusColor}`}>
+                  <span
+                    className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${obra.statusColor}`}
+                  >
                     {obra.status}
                   </span>
                 </div>
@@ -171,9 +182,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Coluna lateral */}
         <div className="flex flex-col gap-4 lg:gap-6">
-          {/* Alertas */}
           <div className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.07),transparent_42%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_78%)]" />
 
@@ -194,7 +203,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Compras Pendentes */}
           <div className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.06),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_78%)]" />
 
@@ -231,7 +239,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Bloco inferior */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:gap-6">
         <SmallInfoCard
           icon={<ClipboardList className="h-5 w-5" />}
@@ -253,7 +260,19 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ icon, title, value, helper, highlight = false }: any) {
+function StatCard({
+  icon,
+  title,
+  value,
+  helper,
+  highlight = false,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  helper: string;
+  highlight?: boolean;
+}) {
   return (
     <div
       className={`group relative overflow-hidden rounded-[20px] border p-4 shadow-lg transition-all hover:-translate-y-1 sm:rounded-[24px] sm:p-5 ${
@@ -272,11 +291,19 @@ function StatCard({ icon, title, value, helper, highlight = false }: any) {
 
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div>
-          <p className={`text-sm font-medium ${highlight ? "text-white/80" : "text-white/50"}`}>
+          <p
+            className={`text-sm font-medium ${
+              highlight ? "text-white/80" : "text-white/50"
+            }`}
+          >
             {title}
           </p>
           <h3 className="mt-1 text-2xl font-bold text-white sm:mt-2">{value}</h3>
-          <p className={`mt-1 text-xs font-medium ${highlight ? "text-white/80" : "text-[#FF8A63]"}`}>
+          <p
+            className={`mt-1 text-xs font-medium ${
+              highlight ? "text-white/80" : "text-[#FF8A63]"
+            }`}
+          >
             {helper}
           </p>
         </div>
@@ -289,7 +316,15 @@ function StatCard({ icon, title, value, helper, highlight = false }: any) {
   );
 }
 
-function MiniStat({ label, value, highlight = false }: any) {
+function MiniStat({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
   return (
     <div
       className={`rounded-2xl border px-3 py-2.5 sm:px-4 sm:py-3 ${
@@ -299,7 +334,11 @@ function MiniStat({ label, value, highlight = false }: any) {
       }`}
     >
       <p className="text-[11px] font-medium text-white/50 sm:text-xs">{label}</p>
-      <p className={`mt-0.5 text-lg font-bold sm:text-xl ${highlight ? "text-[#FF8A63]" : "text-white"}`}>
+      <p
+        className={`mt-0.5 text-lg font-bold sm:text-xl ${
+          highlight ? "text-[#FF8A63]" : "text-white"
+        }`}
+      >
         {value}
       </p>
     </div>
@@ -315,7 +354,15 @@ function AlertItem({ text }: { text: string }) {
   );
 }
 
-function SmallInfoCard({ icon, title, text }: any) {
+function SmallInfoCard({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
   return (
     <div className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[24px] sm:p-5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.06),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_75%)]" />
@@ -326,7 +373,9 @@ function SmallInfoCard({ icon, title, text }: any) {
         </div>
         <div>
           <h3 className="text-sm font-semibold text-white sm:text-base">{title}</h3>
-          <p className="mt-1 text-xs leading-relaxed text-white/50 sm:text-sm">{text}</p>
+          <p className="mt-1 text-xs leading-relaxed text-white/50 sm:text-sm">
+            {text}
+          </p>
         </div>
       </div>
     </div>
