@@ -353,7 +353,7 @@ export default function DashboardLayout({
                 </div>
 
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-sm font-bold text-white shadow-[0_12px_28px_rgba(255,98,0,0.35)] sm:h-11 sm:w-11">
-                  TO
+                  MC
                 </div>
               </div>
             </div>
