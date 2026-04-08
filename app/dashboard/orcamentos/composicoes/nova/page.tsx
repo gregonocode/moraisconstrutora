@@ -280,8 +280,6 @@ export default async function NovaComposicaoPage() {
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#FF5017]/25 bg-[#FF5017] px-3 py-1">
-              
-             
             </div>
 
             <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import EnderecoFields from "./EnderecoFields";
 import {
   ArrowLeft,
   Building2,
@@ -273,58 +274,8 @@ export default async function NovoFornecedorPage() {
               title="Endereço"
               description="Informações de localização do fornecedor."
             />
-
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Field
-                label="CEP"
-                name="cep"
-                placeholder="00000-000"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Endereço"
-                name="endereco"
-                placeholder="Rua, avenida..."
-                icon={<MapPin className="h-4 w-4" />}
-                className="xl:col-span-2"
-              />
-
-              <Field
-                label="Número"
-                name="numero"
-                placeholder="123"
-                icon={<Building2 className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Complemento"
-                name="complemento"
-                placeholder="Sala, bloco..."
-                icon={<Building2 className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Bairro"
-                name="bairro"
-                placeholder="Centro"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Cidade"
-                name="cidade"
-                placeholder="Santarém"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Estado"
-                name="estado"
-                placeholder="PA"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-            </div>
+            
+           <EnderecoFields />
           </div>
         </section>
 

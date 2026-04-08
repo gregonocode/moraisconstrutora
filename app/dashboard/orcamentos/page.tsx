@@ -140,7 +140,7 @@ export default async function OrcamentosPage({ searchParams }: PageProps) {
           title="Novo Orçamento Inteligente"
           description="Gere um orçamento com apoio de IA a partir das informações principais da proposta."
           icon={<Sparkles className="h-5 w-5" />}
-          badge="Em evolução"
+          badge="Em Desenvolvimento"
           accent="orange"
         />
 
@@ -148,7 +148,7 @@ export default async function OrcamentosPage({ searchParams }: PageProps) {
           href="/dashboard/orcamentos/novo?modo=manual"
           title="Novo Orçamento Manual"
           description="Monte seu orçamento manualmente usando composições, serviços, materiais e etapas."
-          icon={<Bot className="h-5 w-5" />}
+          icon={<FileText className="h-5 w-5" />}
           badge="Disponível"
           accent="neutral"
         />

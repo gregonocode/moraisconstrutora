@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import EnderecoFields from "./EnderecoFields";
 import {
   ArrowLeft,
   Briefcase,
@@ -374,67 +375,17 @@ export default async function NovoColaboradorPage() {
         </section>
 
         <section className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5 lg:p-6">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_30%,transparent_70%,rgba(255,255,255,0.015))]" />
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_30%,transparent_70%,rgba(255,255,255,0.015))]" />
 
-          <div className="relative z-10">
-            <SectionTitle
-              title="Endereço"
-              description="Informações residenciais do colaborador."
-            />
+  <div className="relative z-10">
+    <SectionTitle
+      title="Endereço"
+      description="Informações residenciais do colaborador."
+    />
 
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Field
-                label="CEP"
-                name="cep"
-                placeholder="00000-000"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Endereço"
-                name="endereco"
-                placeholder="Rua, avenida..."
-                icon={<MapPin className="h-4 w-4" />}
-                className="xl:col-span-2"
-              />
-
-              <Field
-                label="Número"
-                name="numero"
-                placeholder="Ex: 123"
-                icon={<Building2 className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Complemento"
-                name="complemento"
-                placeholder="Apto, bloco..."
-                icon={<Building2 className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Bairro"
-                name="bairro"
-                placeholder="Ex: Centro"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Cidade"
-                name="cidade"
-                placeholder="Ex: Betim"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-
-              <Field
-                label="Estado"
-                name="estado"
-                placeholder="Ex: MG"
-                icon={<MapPin className="h-4 w-4" />}
-              />
-            </div>
-          </div>
-        </section>
+    <EnderecoFields />
+  </div>
+</section>
 
         <section className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_30%,transparent_70%,rgba(255,255,255,0.015))]" />
