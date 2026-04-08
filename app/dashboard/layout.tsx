@@ -39,11 +39,6 @@ const mainMenu = [
     icon: HardHat,
   },
   {
-    label: "Orçamentos",
-    href: "/dashboard/orcamentos",
-    icon: Receipt,
-  },
-  {
     label: "Planejamento",
     href: "/dashboard/planejamento",
     icon: FolderKanban,
@@ -67,6 +62,19 @@ const mainMenu = [
     label: "Equipe",
     href: "/dashboard/equipe",
     icon: Users,
+  },
+];
+
+const orcamentosMenu = [
+  {
+    label: "Visão geral",
+    href: "/dashboard/orcamentos",
+    icon: Receipt,
+  },
+  {
+    label: "Composições",
+    href: "/dashboard/orcamentos/composicoes",
+    icon: Blocks,
   },
 ];
 
@@ -101,7 +109,6 @@ const recursosMenu = [
     href: "/dashboard/cadastros/recursos/servicos",
     icon: Blocks,
   },
-  
 ];
 
 export default function DashboardLayout({
@@ -114,11 +121,18 @@ export default function DashboardLayout({
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  const isOrcamentosRoute = pathname.startsWith("/dashboard/orcamentos");
   const isCadastrosRoute = pathname.startsWith("/dashboard/cadastros");
   const isRecursosRoute = pathname.startsWith("/dashboard/cadastros/recursos");
 
+  const [orcamentosOpen, setOrcamentosOpen] = useState(isOrcamentosRoute);
   const [cadastrosOpen, setCadastrosOpen] = useState(isCadastrosRoute);
   const [recursosOpen, setRecursosOpen] = useState(isRecursosRoute);
+
+  const orcamentosActive = useMemo(
+    () => orcamentosMenu.some((item) => isActive(item.href)),
+    [pathname]
+  );
 
   const recursosActive = useMemo(
     () => recursosMenu.some((item) => isActive(item.href)),
@@ -218,6 +232,71 @@ export default function DashboardLayout({
                   </Link>
                 );
               })}
+
+              {/* Orçamentos retrátil */}
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setOrcamentosOpen((prev) => !prev)}
+                  className={`group flex w-full items-center justify-between rounded-2xl border px-3 py-3 text-sm transition ${
+                    isOrcamentosRoute
+                      ? "border-[#FF5017]/20 bg-[#FF5017]/8 text-white"
+                      : "border-transparent text-white/70 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+                  }`}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition ${
+                        isOrcamentosRoute
+                          ? "bg-[#FF5017] text-white"
+                          : "bg-white/[0.04] text-white/70 group-hover:bg-orange-500/15 group-hover:text-orange-400"
+                      }`}
+                    >
+                      <Receipt className="h-5 w-5" />
+                    </div>
+                    <span className="truncate font-medium">Orçamentos</span>
+                  </div>
+
+                  {orcamentosOpen ? (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-white/55" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 shrink-0 text-white/35" />
+                  )}
+                </button>
+
+                {orcamentosOpen && (
+                  <div className="ml-4 space-y-1 border-l border-white/6 pl-3">
+                    {orcamentosMenu.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.href);
+
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={`group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition ${
+                            active
+                              ? "bg-[#FF5017]/12 text-white"
+                              : "text-white/65 hover:bg-white/[0.04] hover:text-white"
+                          }`}
+                        >
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition ${
+                              active
+                                ? "bg-[#FF5017] text-white"
+                                : "bg-white/[0.04] text-white/60 group-hover:text-orange-300"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                          </div>
+
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {/* Cadastros retrátil */}
               <div className="space-y-2">
