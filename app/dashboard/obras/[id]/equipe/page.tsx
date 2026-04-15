@@ -7,7 +7,6 @@ import {
   FileText,
   MoreVertical,
   Pencil,
-  Plus,
   Search,
   ShieldCheck,
   Trash2,
@@ -22,7 +21,8 @@ type SearchParams = {
   status?: string;
 };
 
-type PageProps = {
+type EquipePageProps = {
+  params: Promise<{ id: string }>;
   searchParams?: Promise<SearchParams>;
 };
 
@@ -44,12 +44,16 @@ type ColaboradorRow = {
   cargo_rel: { nome: string }[] | null;
 };
 
-export default async function EquipePage({ searchParams }: PageProps) {
-  const params = (await searchParams) ?? {};
+export default async function EquipePage({
+  params,
+  searchParams,
+}: EquipePageProps) {
+  const { id } = await params;
+  const filters = (await searchParams) ?? {};
 
-  const q = params.q?.trim() ?? "";
-  const cargo = params.cargo?.trim() ?? "";
-  const status = params.status?.trim() ?? "";
+  const q = filters.q?.trim() ?? "";
+  const cargo = filters.cargo?.trim() ?? "";
+  const status = filters.status?.trim() ?? "";
 
   const supabase = await createClient();
 
@@ -59,7 +63,7 @@ export default async function EquipePage({ searchParams }: PageProps) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    redirect("/login");
+    redirect(`/login?next=/dashboard/obras/${id}/equipe`);
   }
 
   const { data: usuarioRow, error: usuarioError } = await supabase
@@ -122,7 +126,7 @@ export default async function EquipePage({ searchParams }: PageProps) {
 
   if (colaboradoresRes.error) {
     throw new Error(
-      `Erro ao carregar equipe: ${colaboradoresRes.error.message}`
+      `Erro ao carregar equipe da obra: ${colaboradoresRes.error.message}`
     );
   }
 
@@ -149,16 +153,23 @@ export default async function EquipePage({ searchParams }: PageProps) {
             </div>
 
             <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl">
-              Equipe
+              Equipe da obra
             </h1>
 
             <p className="mt-2 text-sm leading-relaxed text-white/60 sm:mt-4 sm:text-base">
-              Visualize sua equipe de forma centralizada, com filtros rápidos,
-              status dos colaboradores e atalhos para os módulos principais.
+              Visualize a equipe vinculada à obra, acompanhe indicadores do
+              módulo e acesse rotas relacionadas ao cadastro base.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              href={`/dashboard/obras/${id}`}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/[0.08]"
+            >
+              Visão geral da obra
+            </Link>
+
             <Link
               href="/dashboard/cadastros/recursos/mao-de-obra/novo"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF5017] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.99]"
@@ -166,15 +177,11 @@ export default async function EquipePage({ searchParams }: PageProps) {
               <UserPlus className="h-4 w-4" />
               Novo colaborador
             </Link>
-
-            <Link
-              href="/dashboard/cadastros/recursos/cargo-funcao"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/[0.08]"
-            >
-              <Briefcase className="h-4 w-4" />
-              Cargos
-            </Link>
           </div>
+        </div>
+
+        <div className="relative z-10 mt-5 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/70">
+          ID da obra: <span className="font-semibold text-white">{id}</span>
         </div>
       </section>
 
@@ -209,21 +216,21 @@ export default async function EquipePage({ searchParams }: PageProps) {
           <div className="relative z-10">
             <h2 className="text-lg font-semibold text-white">Ações rápidas</h2>
             <p className="text-sm text-white/50">
-              Atalhos para os fluxos mais usados da equipe.
+              Atalhos para os fluxos mais usados do módulo.
             </p>
 
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <QuickLink
-                href="/dashboard/cadastros/recursos/mao-de-obra"
-                title="Mão de obra"
-                description="Gerencie os colaboradores cadastrados."
-                icon={<Users className="h-4 w-4" />}
+                href={`/dashboard/obras/${id}/planejamento`}
+                title="Planejamento"
+                description="Acesse o planejamento desta obra."
+                icon={<Briefcase className="h-4 w-4" />}
               />
               <QuickLink
-                href="/dashboard/cadastros/recursos/cargo-funcao"
-                title="Cargo / Função"
-                description="Cadastre e edite cargos da operação."
-                icon={<Briefcase className="h-4 w-4" />}
+                href={`/dashboard/obras/${id}/rdo`}
+                title="Diário de obra / RDO"
+                description="Registre o andamento diário da obra."
+                icon={<FileText className="h-4 w-4" />}
               />
               <QuickLink
                 href="/dashboard/cadastros/recursos/mao-de-obra/novo"
@@ -233,9 +240,9 @@ export default async function EquipePage({ searchParams }: PageProps) {
               />
               <QuickLink
                 href="/dashboard/cadastros/recursos/mao-de-obra"
-                title="Documentação"
-                description="Base para evoluir documentos da equipe."
-                icon={<FileText className="h-4 w-4" />}
+                title="Cadastro base"
+                description="Gerencie o cadastro geral de mão de obra."
+                icon={<Users className="h-4 w-4" />}
               />
             </div>
           </div>
@@ -247,21 +254,18 @@ export default async function EquipePage({ searchParams }: PageProps) {
           <div className="relative z-10">
             <h2 className="text-lg font-semibold text-white">Resumo do módulo</h2>
             <p className="text-sm text-white/50">
-              Esta tela centraliza a visão operacional da equipe.
+              Esta tela centraliza a visão operacional da equipe por obra.
             </p>
 
             <div className="mt-5 space-y-3">
+              <MiniInfo label="Obra atual" value={id} />
               <MiniInfo
                 label="Cadastro base"
                 value="Colaboradores e cargos"
               />
               <MiniInfo
                 label="Próxima evolução"
-                value="Admissões, documentos e folha"
-              />
-              <MiniInfo
-                label="Origem dos dados"
-                value="Tabelas de equipe já criadas"
+                value="Alocação por obra e frentes de trabalho"
               />
             </div>
           </div>
@@ -278,7 +282,7 @@ export default async function EquipePage({ searchParams }: PageProps) {
                 Colaboradores da equipe
               </h2>
               <p className="text-sm text-white/50">
-                Filtro rápido para acompanhamento operacional.
+                Filtro rápido para acompanhamento operacional da obra.
               </p>
             </div>
 
@@ -345,7 +349,7 @@ export default async function EquipePage({ searchParams }: PageProps) {
               </button>
 
               <Link
-                href="/dashboard/equipe"
+                href={`/dashboard/obras/${id}/equipe`}
                 className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/[0.08]"
               >
                 Limpar filtros
@@ -467,7 +471,7 @@ export default async function EquipePage({ searchParams }: PageProps) {
             <p>Mostrando {colaboradores.length} colaboradores</p>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-white/60">
-              Módulo pronto para crescer
+              Módulo vinculado à obra {id}
             </div>
           </div>
         </div>

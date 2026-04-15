@@ -2,24 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Blocks,
-  Box,
+  Package,
   BriefcaseBusiness,
   ChevronDown,
   ChevronRight,
-  ClipboardList,
-  FolderKanban,
+  Receipt,
   HardHat,
   LayoutDashboard,
-  Package,
-  Receipt,
-  ShoppingCart,
   UserCog,
+  UserRound,
   Users,
   Wrench,
-  BadgeDollarSign,
 } from "lucide-react";
 import { DashboardLogoutButton } from "@/app/components/DashboardLogoutButton";
 
@@ -33,34 +29,17 @@ const mainMenu = [
     href: "/dashboard",
     icon: LayoutDashboard,
   },
+];
+
+const obrasMenu = [
   {
-    label: "Obras",
+    label: "Visão geral",
     href: "/dashboard/obras",
     icon: HardHat,
   },
   {
-    label: "Planejamento",
-    href: "/dashboard/planejamento",
-    icon: FolderKanban,
-  },
-  {
-    label: "Diário de Obra",
-    href: "/dashboard/rdo",
-    icon: ClipboardList,
-  },
-  {
-    label: "Compras",
-    href: "/dashboard/compras",
-    icon: ShoppingCart,
-  },
-  {
-    label: "Estoque",
-    href: "/dashboard/estoque",
-    icon: Box,
-  },
-  {
     label: "Equipe",
-    href: "/dashboard/equipe",
+    href: "/dashboard/obras/equipe",
     icon: Users,
   },
 ];
@@ -79,6 +58,11 @@ const orcamentosMenu = [
 ];
 
 const recursosMenu = [
+  {
+    label: "Clientes",
+    href: "/dashboard/cadastros/recursos/clientes",
+    icon: UserRound,
+  },
   {
     label: "Materiais",
     href: "/dashboard/cadastros/recursos/materiais",
@@ -121,23 +105,18 @@ export default function DashboardLayout({
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  const isObrasRoute = pathname.startsWith("/dashboard/obras");
   const isOrcamentosRoute = pathname.startsWith("/dashboard/orcamentos");
   const isCadastrosRoute = pathname.startsWith("/dashboard/cadastros");
   const isRecursosRoute = pathname.startsWith("/dashboard/cadastros/recursos");
 
+  const [obrasOpen, setObrasOpen] = useState(isObrasRoute);
   const [orcamentosOpen, setOrcamentosOpen] = useState(isOrcamentosRoute);
   const [cadastrosOpen, setCadastrosOpen] = useState(isCadastrosRoute);
   const [recursosOpen, setRecursosOpen] = useState(isRecursosRoute);
 
-  const orcamentosActive = useMemo(
-    () => orcamentosMenu.some((item) => isActive(item.href)),
-    [pathname]
-  );
-
-  const recursosActive = useMemo(
-    () => recursosMenu.some((item) => isActive(item.href)),
-    [pathname]
-  );
+  const obrasActive = obrasMenu.some((item) => isActive(item.href));
+  const recursosActive = recursosMenu.some((item) => isActive(item.href));
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#0b0b0c] text-white">
@@ -232,6 +211,71 @@ export default function DashboardLayout({
                   </Link>
                 );
               })}
+
+              {/* Obras retrátil */}
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setObrasOpen((prev) => !prev)}
+                  className={`group flex w-full items-center justify-between rounded-2xl border px-3 py-3 text-sm transition ${
+                    obrasActive
+                      ? "border-[#FF5017]/20 bg-[#FF5017]/8 text-white"
+                      : "border-transparent text-white/70 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+                  }`}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition ${
+                        obrasActive
+                          ? "bg-[#FF5017] text-white"
+                          : "bg-white/[0.04] text-white/70 group-hover:bg-orange-500/15 group-hover:text-orange-400"
+                      }`}
+                    >
+                      <HardHat className="h-5 w-5" />
+                    </div>
+                    <span className="truncate font-medium">Obras</span>
+                  </div>
+
+                  {obrasOpen ? (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-white/55" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 shrink-0 text-white/35" />
+                  )}
+                </button>
+
+                {obrasOpen && (
+                  <div className="ml-4 space-y-1 border-l border-white/6 pl-3">
+                    {obrasMenu.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.href);
+
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={`group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition ${
+                            active
+                              ? "bg-[#FF5017]/12 text-white"
+                              : "text-white/65 hover:bg-white/[0.04] hover:text-white"
+                          }`}
+                        >
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition ${
+                              active
+                                ? "bg-[#FF5017] text-white"
+                                : "bg-white/[0.04] text-white/60 group-hover:text-orange-300"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                          </div>
+
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {/* Orçamentos retrátil */}
               <div className="space-y-2">
