@@ -204,9 +204,15 @@ export default function OrcamentoFormClient({
             <Field>
               <Label htmlFor="empresa_id">Empresa</Label>
               <Select id="empresa_id" name="empresa_id" defaultValue="">
-                <option value="">Selecione uma empresa</option>
+                <option value="" className="bg-[#252525] text-white">
+                  Selecione uma empresa
+                </option>
                 {empresas.map((item) => (
-                  <option key={item.id} value={item.id}>
+                  <option
+                    key={item.id}
+                    value={item.id}
+                    className="bg-[#252525] text-white"
+                  >
                     {item.nome}
                   </option>
                 ))}
@@ -216,9 +222,15 @@ export default function OrcamentoFormClient({
             <Field>
               <Label htmlFor="cliente_id">Cliente</Label>
               <Select id="cliente_id" name="cliente_id" defaultValue="">
-                <option value="">Selecione um cliente</option>
+                <option value="" className="bg-[#252525] text-white">
+                  Selecione um cliente
+                </option>
                 {clientes.map((item) => (
-                  <option key={item.id} value={item.id}>
+                  <option
+                    key={item.id}
+                    value={item.id}
+                    className="bg-[#252525] text-white"
+                  >
                     {item.nome}
                   </option>
                 ))}
@@ -384,10 +396,27 @@ export default function OrcamentoFormClient({
                         )
                       }
                     >
-                      <option value="">Selecione o tipo</option>
-                      <option value="composicao">Composição</option>
-                      <option value="material">Material</option>
-                      <option value="servico">Serviço</option>
+                      <option value="" className="bg-[#252525] text-white">
+                        Selecione o tipo
+                      </option>
+                      <option
+                        value="composicao"
+                        className="bg-[#252525] text-white"
+                      >
+                        Composição
+                      </option>
+                      <option
+                        value="material"
+                        className="bg-[#252525] text-white"
+                      >
+                        Material
+                      </option>
+                      <option
+                        value="servico"
+                        className="bg-[#252525] text-white"
+                      >
+                        Serviço
+                      </option>
                     </Select>
                   </div>
 
@@ -402,9 +431,15 @@ export default function OrcamentoFormClient({
                           handleComposicaoChange(item.id, e.target.value)
                         }
                       >
-                        <option value="">Selecione uma composição</option>
+                        <option value="" className="bg-[#252525] text-white">
+                          Selecione uma composição
+                        </option>
                         {composicoes.map((c) => (
-                          <option key={c.id} value={c.id}>
+                          <option
+                            key={c.id}
+                            value={c.id}
+                            className="bg-[#252525] text-white"
+                          >
                             {c.nome}
                           </option>
                         ))}
@@ -423,9 +458,15 @@ export default function OrcamentoFormClient({
                           handleMaterialChange(item.id, e.target.value)
                         }
                       >
-                        <option value="">Selecione um material</option>
+                        <option value="" className="bg-[#252525] text-white">
+                          Selecione um material
+                        </option>
                         {materiais.map((m) => (
-                          <option key={m.id} value={m.id}>
+                          <option
+                            key={m.id}
+                            value={m.id}
+                            className="bg-[#252525] text-white"
+                          >
                             {m.nome}
                           </option>
                         ))}
@@ -444,9 +485,15 @@ export default function OrcamentoFormClient({
                           handleServicoChange(item.id, e.target.value)
                         }
                       >
-                        <option value="">Selecione um serviço</option>
+                        <option value="" className="bg-[#252525] text-white">
+                          Selecione um serviço
+                        </option>
                         {servicos.map((s) => (
-                          <option key={s.id} value={s.id}>
+                          <option
+                            key={s.id}
+                            value={s.id}
+                            className="bg-[#252525] text-white"
+                          >
                             {s.nome}
                           </option>
                         ))}
@@ -725,8 +772,8 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={[
-        "w-full rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition",
-        "focus:border-[#FF5017]/30 focus:bg-white/[0.05]",
+        "w-full rounded-2xl border border-white/5 bg-[#2B2B2B] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition",
+        "focus:border-[#FF5017]/30 focus:bg-[#303030]",
         props.className ?? "",
       ].join(" ")}
     />
@@ -738,8 +785,8 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={[
-        "w-full rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition",
-        "focus:border-[#FF5017]/30 focus:bg-white/[0.05]",
+        "w-full rounded-2xl border border-white/5 bg-[#2B2B2B] px-4 py-3 text-sm text-white outline-none transition",
+        "focus:border-[#FF5017]/30 focus:bg-[#303030]",
         props.className ?? "",
       ].join(" ")}
     >
@@ -754,8 +801,8 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
       {...props}
       rows={4}
       className={[
-        "w-full rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition",
-        "focus:border-[#FF5017]/30 focus:bg-white/[0.05]",
+        "w-full rounded-2xl border border-white/5 bg-[#2B2B2B] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition",
+        "focus:border-[#FF5017]/30 focus:bg-[#303030]",
         props.className ?? "",
       ].join(" ")}
     />
