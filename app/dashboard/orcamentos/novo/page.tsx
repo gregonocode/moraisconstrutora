@@ -14,6 +14,7 @@ import {
   User2,
 } from "lucide-react";
 import { createClient } from "@/app/lib/supabase/server";
+import OrcamentoFormClient from "./OrcamentoFormClient";
 
 type SearchParams = {
   modo?: string;
@@ -36,16 +37,19 @@ type EmpresaRow = {
 type ComposicaoRow = {
   id: string;
   nome: string;
+  custo_total?: number | null;
 };
 
 type MaterialRow = {
   id: string;
   nome: string;
+  preco?: number | null;
 };
 
 type ServicoRow = {
   id: string;
   nome: string;
+  custo_unitario?: number | null;
 };
 
 export default async function NovoOrcamentoPage({ searchParams }: PageProps) {
@@ -101,22 +105,22 @@ export default async function NovoOrcamentoPage({ searchParams }: PageProps) {
       .limit(50),
     supabase
       .from("composicoes")
-      .select("id, nome")
+      .select("id, nome, custo_total")
       .eq("user_id", userId)
       .order("nome", { ascending: true })
-      .limit(10),
+      .limit(200),
     supabase
       .from("materiais")
-      .select("id, nome")
+      .select("id, nome, preco")
       .eq("user_id", userId)
       .order("nome", { ascending: true })
-      .limit(10),
+      .limit(200),
     supabase
       .from("servicos")
-      .select("id, nome")
+      .select("id, nome, custo_unitario")
       .eq("user_id", userId)
       .order("nome", { ascending: true })
-      .limit(10),
+      .limit(200),
     supabase
       .from("orcamentos")
       .select("id", { count: "exact", head: true })
@@ -209,6 +213,77 @@ export default async function NovoOrcamentoPage({ searchParams }: PageProps) {
       throw new Error("Margem de lucro inválida.");
     }
 
+    const tipos = formData.getAll("item_tipo").map((v) => String(v));
+    const composicaoIds = formData
+      .getAll("item_composicao_id")
+      .map((v) => String(v));
+    const materialIds = formData.getAll("item_material_id").map((v) => String(v));
+    const servicoIds = formData.getAll("item_servico_id").map((v) => String(v));
+    const descricoes = formData.getAll("item_descricao").map((v) => String(v));
+    const quantidades = formData.getAll("item_quantidade").map((v) => String(v));
+    const custosUnitarios = formData
+      .getAll("item_custo_unitario")
+      .map((v) => String(v));
+    const vendasUnitarias = formData
+      .getAll("item_venda_unitaria")
+      .map((v) => String(v));
+
+    const itens: Array<{
+      user_id: string;
+      orcamento_id: string;
+      ordem: number;
+      tipo_item: string;
+      composicao_id: string | null;
+      material_id: string | null;
+      servico_id: string | null;
+      descricao: string | null;
+      quantidade: number;
+      custo_unitario: number;
+      venda_unitaria: number;
+      custo_total: number;
+      total: number;
+    }> = [];
+
+    for (let i = 0; i < tipos.length; i++) {
+      const tipoItem = (tipos[i] ?? "").trim();
+      const quantidade = toNumber(quantidades[i]);
+      const custoUnitario = toNumber(custosUnitarios[i]);
+      const vendaUnitaria = toNumber(vendasUnitarias[i]);
+
+      const composicaoId = emptyToNull(composicaoIds[i]);
+      const materialId = emptyToNull(materialIds[i]);
+      const servicoId = emptyToNull(servicoIds[i]);
+      const descricaoItem = emptyToNull(descricoes[i]);
+
+      const hasValidTarget =
+        (tipoItem === "composicao" && composicaoId) ||
+        (tipoItem === "material" && materialId) ||
+        (tipoItem === "servico" && servicoId);
+
+      if (!tipoItem || !hasValidTarget || quantidade <= 0) {
+        continue;
+      }
+
+      itens.push({
+        user_id: userId,
+        orcamento_id: "",
+        ordem: itens.length + 1,
+        tipo_item: tipoItem,
+        composicao_id: tipoItem === "composicao" ? composicaoId : null,
+        material_id: tipoItem === "material" ? materialId : null,
+        servico_id: tipoItem === "servico" ? servicoId : null,
+        descricao: descricaoItem,
+        quantidade,
+        custo_unitario: custoUnitario,
+        venda_unitaria: vendaUnitaria,
+        custo_total: quantidade * custoUnitario,
+        total: quantidade * vendaUnitaria,
+      });
+    }
+
+    const custo_total = itens.reduce((acc, item) => acc + item.custo_total, 0);
+    const valor_total = itens.reduce((acc, item) => acc + item.total, 0);
+
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
@@ -220,8 +295,8 @@ export default async function NovoOrcamentoPage({ searchParams }: PageProps) {
         codigo,
         titulo,
         descricao,
-        valor_total: 0,
-        custo_total: 0,
+        valor_total,
+        custo_total,
         margem_lucro,
         status: "rascunho",
         validade_em,
@@ -234,6 +309,23 @@ export default async function NovoOrcamentoPage({ searchParams }: PageProps) {
 
     if (error) {
       throw new Error(`Erro ao salvar orçamento: ${error.message}`);
+    }
+
+    if (itens.length > 0) {
+      const orcamentoId = data.id as string;
+
+      const itensFinal = itens.map((item) => ({
+        ...item,
+        orcamento_id: orcamentoId,
+      }));
+
+      const { error: itensError } = await supabase
+        .from("orcamento_itens")
+        .insert(itensFinal);
+
+      if (itensError) {
+        throw new Error(`Erro ao salvar itens do orçamento: ${itensError.message}`);
+      }
     }
 
     redirect(`/dashboard/orcamentos/${data.id}`);
@@ -322,220 +414,16 @@ export default async function NovoOrcamentoPage({ searchParams }: PageProps) {
         />
       </section>
 
-      <form action={createOrcamento} className="space-y-4">
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-          <CardBlock
-            title="Informações básicas"
-            description="Preencha os dados principais para iniciar o orçamento."
-          >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field>
-                <Label htmlFor="codigo">Código</Label>
-                <Input
-                  id="codigo"
-                  name="codigo"
-                  defaultValue={sugestaoCodigo}
-                />
-              </Field>
-
-              <Field>
-                <Label htmlFor="titulo">Título do orçamento</Label>
-                <Input
-                  id="titulo"
-                  name="titulo"
-                  placeholder="Ex: Residência unifamiliar - etapa estrutural"
-                  required
-                />
-              </Field>
-
-              <Field>
-                <Label htmlFor="empresa_id">Empresa</Label>
-                <Select id="empresa_id" name="empresa_id">
-                  <option value="">Selecione uma empresa</option>
-                  {empresas.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.nome}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-
-              <Field>
-                <Label htmlFor="cliente_id">Cliente</Label>
-                <Select id="cliente_id" name="cliente_id">
-                  <option value="">Selecione um cliente</option>
-                  {clientes.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.nome}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-
-              <Field>
-                <Label htmlFor="validade_em">Validade</Label>
-                <Input id="validade_em" name="validade_em" type="date" />
-              </Field>
-
-              <Field>
-                <Label htmlFor="margem_lucro">Margem de lucro (%)</Label>
-                <Input
-                  id="margem_lucro"
-                  name="margem_lucro"
-                  type="number"
-                  step="0.01"
-                  placeholder="Ex: 15.00"
-                />
-              </Field>
-
-              <Field className="sm:col-span-2">
-                <Label htmlFor="descricao">Descrição</Label>
-                <Textarea
-                  id="descricao"
-                  name="descricao"
-                  placeholder="Descreva o escopo, premissas e objetivo do orçamento."
-                />
-              </Field>
-
-              <Field className="sm:col-span-2">
-                <Label htmlFor="observacoes">Observações</Label>
-                <Textarea
-                  id="observacoes"
-                  name="observacoes"
-                  placeholder="Condições comerciais, observações técnicas e detalhes complementares."
-                />
-              </Field>
-            </div>
-          </CardBlock>
-
-          <CardBlock
-            title={modo === "ia" ? "Entrada inteligente" : "Base operacional"}
-            description={
-              modo === "ia"
-                ? "Campos pensados para orientar a futura geração de orçamento por IA."
-                : "Referências internas já disponíveis para montar o orçamento manual."
-            }
-          >
-            {modo === "ia" ? (
-              <div className="space-y-4">
-                <MiniInfo
-                  icon={<Brain className="h-4 w-4" />}
-                  label="Objetivo"
-                  value="Gerar uma estrutura inicial de orçamento a partir de um prompt técnico."
-                />
-                <MiniInfo
-                  icon={<MessageSquareText className="h-4 w-4" />}
-                  label="Prompt sugerido"
-                  value="Descreva o tipo de obra, padrão construtivo, escopo e restrições do cliente."
-                />
-                <MiniInfo
-                  icon={<CircleDollarSign className="h-4 w-4" />}
-                  label="Próxima etapa"
-                  value="Após gerar com IA, revisar itens, custos, venda e aprovação."
-                />
-                <div className="rounded-2xl border border-dashed border-[#FF5017]/20 bg-[#FF5017]/5 p-4 text-sm text-[#FFB39A]">
-                  Nesta primeira versão, o card inteligente já deixa o fluxo
-                  pronto visualmente. Depois você pode ligar isso a um endpoint
-                  real de IA.
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <MiniInfo
-                  icon={<ClipboardList className="h-4 w-4" />}
-                  label="Composições disponíveis"
-                  value={`${composicoes.length} composição(ões) pronta(s) para apoiar o orçamento.`}
-                />
-                <MiniInfo
-                  icon={<FileText className="h-4 w-4" />}
-                  label="Materiais disponíveis"
-                  value={`${materiais.length} material(is) carregado(s) para composição de custo.`}
-                />
-                <MiniInfo
-                  icon={<Calculator className="h-4 w-4" />}
-                  label="Serviços disponíveis"
-                  value={`${servicos.length} serviço(s) vinculado(s) ao seu usuário.`}
-                />
-
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <MiniList
-                    title="Composições recentes"
-                    items={composicoes.map((item) => item.nome)}
-                    emptyText="Nenhuma composição encontrada."
-                  />
-                  <MiniList
-                    title="Serviços recentes"
-                    items={servicos.map((item) => item.nome)}
-                    emptyText="Nenhum serviço encontrado."
-                  />
-                </div>
-              </div>
-            )}
-          </CardBlock>
-        </section>
-
-        <CardBlock
-          title="Estrutura inicial dos itens"
-          description="Bloco visual para orientar a próxima etapa do cadastro detalhado."
-        >
-          <div className="overflow-hidden rounded-[20px] border border-white/5 bg-white/[0.02]">
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-separate border-spacing-0">
-                <thead>
-                  <tr className="bg-white/[0.03]">
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
-                      Ordem
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
-                      Tipo
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
-                      Descrição
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
-                      Quantidade
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
-                      Custo unit.
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
-                      Venda unit.
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
-                      Total venda
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="px-4 py-10 text-center text-sm text-white/45"
-                    >
-                      Nenhum item adicionado ainda. Na próxima etapa, aqui entra
-                      o cadastro real de itens do orçamento.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </CardBlock>
-
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <TopAction href="/dashboard/orcamentos" variant="ghost">
-            Cancelar
-          </TopAction>
-
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF5017] px-4 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
-          >
-            Salvar orçamento
-          </button>
-        </div>
-      </form>
+      <OrcamentoFormClient
+        action={createOrcamento}
+        modo={modo}
+        sugestaoCodigo={sugestaoCodigo}
+        clientes={clientes}
+        empresas={empresas}
+        composicoes={composicoes}
+        materiais={materiais}
+        servicos={servicos}
+      />
     </div>
   );
 }
@@ -545,30 +433,27 @@ function buildBudgetCode(total: number) {
   return `ORC-${String(next).padStart(4, "0")}`;
 }
 
-function CardBlock({
-  title,
-  description,
+function TopAction({
+  href,
   children,
+  variant = "ghost",
 }: {
-  title: string;
-  description?: string;
+  href: string;
   children: ReactNode;
+  variant?: "ghost" | "primary";
 }) {
+  const styles =
+    variant === "primary"
+      ? "bg-[#FF5017] text-white hover:brightness-110"
+      : "border border-white/10 bg-white/[0.04] text-white/70 hover:bg-white/[0.08]";
+
+  const base =
+    "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition";
+
   return (
-    <section className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5 lg:p-6">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_30%,transparent_70%,rgba(255,255,255,0.015))]" />
-
-      <div className="relative z-10">
-        <div className="mb-5">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
-          {description ? (
-            <p className="text-sm text-white/50">{description}</p>
-          ) : null}
-        </div>
-
-        {children}
-      </div>
-    </section>
+    <Link href={href} className={`${base} ${styles}`}>
+      {children}
+    </Link>
   );
 }
 
@@ -612,148 +497,13 @@ function SummaryCard({
   );
 }
 
-function MiniInfo({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3">
-      <div className="flex items-center gap-2 text-white/70">
-        {icon}
-        <p className="text-xs uppercase tracking-[0.12em] text-white/35">
-          {label}
-        </p>
-      </div>
-      <p className="mt-2 text-sm leading-relaxed text-white/75">{value}</p>
-    </div>
-  );
+function emptyToNull(value: string | null | undefined) {
+  const text = String(value ?? "").trim();
+  return text ? text : null;
 }
 
-function MiniList({
-  title,
-  items,
-  emptyText,
-}: {
-  title: string;
-  items: string[];
-  emptyText: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.04] p-4">
-      <p className="text-xs uppercase tracking-[0.12em] text-white/35">
-        {title}
-      </p>
-
-      <div className="mt-3 space-y-2">
-        {items.length === 0 ? (
-          <p className="text-sm text-white/45">{emptyText}</p>
-        ) : (
-          items.slice(0, 5).map((item, index) => (
-            <div
-              key={`${item}-${index}`}
-              className="rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 text-sm text-white/70"
-            >
-              {item}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TopAction({
-  href,
-  children,
-  variant = "ghost",
-}: {
-  href: string;
-  children: ReactNode;
-  variant?: "ghost" | "primary";
-}) {
-  const styles =
-    variant === "primary"
-      ? "bg-[#FF5017] text-white hover:brightness-110"
-      : "border border-white/10 bg-white/[0.04] text-white/70 hover:bg-white/[0.08]";
-
-  const base =
-    "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition";
-
-  return <Link href={href} className={`${base} ${styles}`}>{children}</Link>;
-}
-
-function Field({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return <div className={`space-y-2 ${className}`}>{children}</div>;
-}
-
-function Label({
-  htmlFor,
-  children,
-}: {
-  htmlFor: string;
-  children: ReactNode;
-}) {
-  return (
-    <label
-      htmlFor={htmlFor}
-      className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40"
-    >
-      {children}
-    </label>
-  );
-}
-
-function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      className={[
-        "w-full rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition",
-        "focus:border-[#FF5017]/30 focus:bg-white/[0.05]",
-        props.className ?? "",
-      ].join(" ")}
-    />
-  );
-}
-
-function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      {...props}
-      className={[
-        "w-full rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition",
-        "focus:border-[#FF5017]/30 focus:bg-white/[0.05]",
-        props.className ?? "",
-      ].join(" ")}
-    >
-      {props.children}
-    </select>
-  );
-}
-
-function Textarea(
-  props: React.TextareaHTMLAttributes<HTMLTextAreaElement>
-) {
-  return (
-    <textarea
-      {...props}
-      rows={4}
-      className={[
-        "w-full rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition",
-        "focus:border-[#FF5017]/30 focus:bg-white/[0.05]",
-        props.className ?? "",
-      ].join(" ")}
-    />
-  );
+function toNumber(value: string | null | undefined) {
+  const text = String(value ?? "").trim().replace(",", ".");
+  const num = Number(text);
+  return Number.isFinite(num) ? num : 0;
 }
