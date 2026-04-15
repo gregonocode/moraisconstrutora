@@ -275,7 +275,7 @@ export default async function NovaComposicaoPage() {
     <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:space-y-8 lg:p-8">
       <section className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-5 shadow-2xl sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.84),transparent_54%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.02),transparent_42%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.11),transparent_28%,transparent_72%,rgba(255,255,255,0.02))]" />
+        <div className="absolute inset-0" />
 
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
