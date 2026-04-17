@@ -1,12 +1,22 @@
 // app/api/orcamentos/[id]/pdf/route.ts
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@/app/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const viewport = {
+  width: 1280,
+  height: 1800,
+  deviceScaleFactor: 1,
+  isMobile: false,
+  hasTouch: false,
+  isLandscape: false,
+} as const;
 
 type RouteContext = {
   params: Promise<{
@@ -275,9 +285,20 @@ export async function GET(_request: Request, context: RouteContext) {
       logoSvgMarkup,
     });
 
+    const isLocal = process.env.NODE_ENV !== "production";
+
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: isLocal
+        ? puppeteer.defaultArgs()
+        : puppeteer.defaultArgs({
+            args: chromium.args,
+            headless: "shell",
+          }),
+      defaultViewport: viewport,
+      executablePath: isLocal
+        ? process.env.PUPPETEER_EXECUTABLE_PATH || undefined
+        : await chromium.executablePath(),
+      headless: isLocal ? true : "shell",
     });
 
     try {
