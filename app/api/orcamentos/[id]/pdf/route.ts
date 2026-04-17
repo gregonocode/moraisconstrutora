@@ -273,7 +273,7 @@ export async function GET(_request: Request, context: RouteContext) {
     const cliente = orcamento.cliente?.[0] ?? null;
     const valorTotal = Number(orcamento.valor_total ?? 0);
 
-    const logoSvgMarkup = await loadLogoSvgMarkup();
+    const logoDataUrl = await loadLogoDataUrl();
 
     const html = buildProposalHtml({
       orcamento,
@@ -282,7 +282,7 @@ export async function GET(_request: Request, context: RouteContext) {
       etapas,
       valorTotal,
       responsavelNome: usuarioRow.nome ?? "Usuário",
-      logoSvgMarkup,
+      logoDataUrl,
     });
 
     const isLocal = process.env.NODE_ENV !== "production";
@@ -344,27 +344,14 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 }
 
-async function loadLogoSvgMarkup() {
+async function loadLogoDataUrl() {
   try {
     const logoPath = path.join(process.cwd(), "public", "logomorais.svg");
     const rawSvg = await readFile(logoPath, "utf-8");
-
-    return rawSvg
-      .replace(/<\?xml[\s\S]*?\?>/gi, "")
-      .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
-      .replace(/width="[^"]*"/gi, "")
-      .replace(/height="[^"]*"/gi, "")
-      .replace(
-        /<svg\b([^>]*)>/i,
-        `<svg $1 preserveAspectRatio="xMidYMid meet" aria-hidden="true">`
-      );
+    const base64 = Buffer.from(rawSvg, "utf-8").toString("base64");
+    return `data:image/svg+xml;base64,${base64}`;
   } catch {
-    return `
-      <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect width="180" height="180" rx="24" fill="#FFFFFF"/>
-        <path d="M50 130V55h16l24 33 24-33h16v75h-17V84l-23 31h-1L67 84v46H50Z" fill="#0D1B2A"/>
-      </svg>
-    `;
+    return "";
   }
 }
 
@@ -375,7 +362,7 @@ function buildProposalHtml({
   etapas,
   valorTotal,
   responsavelNome,
-  logoSvgMarkup,
+  logoDataUrl,
 }: {
   orcamento: OrcamentoRow;
   cliente: ClienteRow[number] | null;
@@ -383,7 +370,7 @@ function buildProposalHtml({
   etapas: OrcamentoEtapaRow[];
   valorTotal: number;
   responsavelNome: string;
-  logoSvgMarkup: string;
+  logoDataUrl: string;
 }) {
   const diferenciais = normalizeStringArray(orcamento.diferenciais, [
     "Obra no prazo",
@@ -438,65 +425,65 @@ function buildProposalHtml({
 
   const stats = [
     {
-      icon: "🪖",
+      icon: "01",
       num: "+10",
       label: "Anos de experiência no mercado",
     },
     {
-      icon: "🏠",
+      icon: "02",
       num: "+30",
       label: "Obras residenciais concluídas",
     },
     {
-      icon: "🛡️",
+      icon: "03",
       num: "100%",
       label: "Compromisso com prazo e execução",
     },
     {
-      icon: "⭐",
-      num: "5★",
+      icon: "04",
+      num: "5",
       label: "Atendimento próximo ao cliente",
     },
   ];
 
   const diferencialCards = [
     {
-      icon: "⏱️",
+      icon: "01",
       title: "Obra no prazo",
       desc:
         diferenciais[0] ||
         "Cronograma rigoroso com marcos de acompanhamento da obra.",
     },
     {
-      icon: "⚡",
+      icon: "02",
       title: "Agilidade e Qualidade",
       desc:
         diferenciais[1] ||
         "Ritmo de execução com qualidade técnica e acabamento bem conduzido.",
     },
     {
-      icon: "👷",
+      icon: "03",
       title: "Equipe própria",
       desc:
         diferenciais[2] ||
         "Profissionais comprometidos com a execução e organização da obra.",
     },
     {
-      icon: "💬",
+      icon: "04",
       title: "Comunicação clara",
       desc:
         diferenciais[3] ||
         "Atualizações e alinhamentos com clareza durante as etapas da execução.",
     },
     {
-      icon: "📄",
+      icon: "05",
       title: "Contrato claro",
       desc:
         diferenciais[4] ||
         "Escopo, prazo e condições bem definidos para mais segurança comercial.",
     },
     {
-      icon: "🛡️",
+      icon: "06",
       title: "Garantia",
       desc: diferenciais[5] || garantiaTexto,
     },
@@ -684,25 +671,27 @@ function buildProposalHtml({
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 18mm 12mm;
+      justify-content: flex-start;
+      padding: 24mm 12mm 18mm;
       border-right: 3px solid var(--gold);
       position: relative;
       flex-shrink: 0;
     }
 
     .capa-logo {
-      width: 56mm;
-      height: 56mm;
+      width: 70mm;
+      height: 70mm;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 10mm;
     }
 
-    .capa-logo svg {
+    .capa-logo svg,
+    .capa-logo img {
       width: 100%;
       height: 100%;
+      object-fit: contain;
       display: block;
     }
 
@@ -828,7 +817,7 @@ function buildProposalHtml({
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
       gap: 12mm;
-      flex: 1;
+      align-items: start;
     }
 
     .sobre-text {
@@ -858,6 +847,7 @@ function buildProposalHtml({
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+      align-items: start;
     }
 
     .stat-card {
@@ -866,13 +856,25 @@ function buildProposalHtml({
       border-radius: 6px;
       text-align: center;
       box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      min-height: 100px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .stat-icon {
-      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
       margin-bottom: 6px;
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .stat-num {
@@ -887,6 +889,8 @@ function buildProposalHtml({
       font-size: 10px;
       color: var(--muted);
       line-height: 1.45;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .porque-headline {
@@ -910,7 +914,7 @@ function buildProposalHtml({
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      flex: 1;
+      align-items: start;
     }
 
     .diff-card {
@@ -922,14 +926,25 @@ function buildProposalHtml({
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
       gap: 6px;
+      height: 150px;
     }
 
     .diff-icon {
-      font-size: 26px;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
       line-height: 1;
       margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .diff-title {
@@ -943,6 +958,8 @@ function buildProposalHtml({
       font-size: 10px;
       color: var(--muted);
       line-height: 1.6;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .escopo-subtitle,
@@ -957,7 +974,7 @@ function buildProposalHtml({
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0 12px;
-      flex: 1;
+      align-items: start;
     }
 
     .escopo-item {
@@ -1108,7 +1125,7 @@ function buildProposalHtml({
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      flex: 1;
+      align-items: start;
     }
 
     .fluxo-card {
@@ -1119,6 +1136,7 @@ function buildProposalHtml({
       box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
+      min-height: 240px;
     }
 
     .fluxo-header {
@@ -1191,6 +1209,8 @@ function buildProposalHtml({
       color: var(--gray);
       line-height: 1.55;
       margin-bottom: 10px;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .fluxo-items {
@@ -1249,7 +1269,7 @@ function buildProposalHtml({
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      flex: 1;
+      align-items: start;
     }
 
     .step-card {
@@ -1260,9 +1280,10 @@ function buildProposalHtml({
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: flex-start;
       text-align: center;
       gap: 8px;
-      min-height: 132px;
+      height: 170px;
     }
 
     .step-num {
@@ -1290,6 +1311,8 @@ function buildProposalHtml({
       font-size: 10px;
       color: var(--muted);
       line-height: 1.55;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .cta-btn {
@@ -1465,7 +1488,13 @@ function buildProposalHtml({
 
     <section class="slide cover">
       <div class="capa-left">
-        <div class="capa-logo">${logoSvgMarkup}</div>
+        <div class="capa-logo">
+          ${
+            logoDataUrl
+              ? `<img src="${logoDataUrl}" alt="Logo Morais Construtora" />`
+              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;border:2px solid #C9A84C;border-radius:16px;color:#fff;font-size:40px;font-weight:700;">M</div>`
+          }
+        </div>
         <div class="capa-brand">MORAIS</div>
         <div class="capa-sub">Construtora</div>
         <div class="capa-divider"></div>
@@ -1655,7 +1684,7 @@ function buildProposalHtml({
             .join("")}
 
           <div class="escopo-item escopo-garantia">
-            <span class="escopo-check">🛡️</span>
+            <span class="escopo-check">✔</span>
             <span class="escopo-text">${escapeHtml(garantiaTexto)}</span>
           </div>
         </div>
