@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Blocks,
   Package,
@@ -16,6 +16,8 @@ import {
   UserRound,
   Users,
   Wrench,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { DashboardLogoutButton } from "@/app/components/DashboardLogoutButton";
 
@@ -99,6 +101,7 @@ export default function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
   const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -114,9 +117,46 @@ export default function DashboardLayout({
   const [orcamentosOpen, setOrcamentosOpen] = useState(isOrcamentosRoute);
   const [cadastrosOpen, setCadastrosOpen] = useState(isCadastrosRoute);
   const [recursosOpen, setRecursosOpen] = useState(isRecursosRoute);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   const obrasActive = obrasMenu.some((item) => isActive(item.href));
   const recursosActive = recursosMenu.some((item) => isActive(item.href));
+
+  const currentDate = useMemo(() => {
+    return new Intl.DateTimeFormat("pt-BR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "short",
+    }).format(new Date());
+  }, []);
+
+  const formattedDate =
+    currentDate.charAt(0).toUpperCase() + currentDate.slice(1);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setProfileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#0b0b0c] text-white">
@@ -444,17 +484,6 @@ export default function DashboardLayout({
               </div>
             </nav>
           </div>
-
-          <div className="border-t border-white/8 p-4">
-            <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.025))] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-md">
-              <p className="text-sm font-semibold text-white">Tiago Oliveira</p>
-              <p className="mt-1 text-xs text-white/45">
-                Administrador da plataforma
-              </p>
-
-              <DashboardLogoutButton />
-            </div>
-          </div>
         </aside>
 
         {/* Conteúdo */}
@@ -472,11 +501,40 @@ export default function DashboardLayout({
 
               <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                 <div className="hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/55 md:block">
-                  Segunda-feira, 30 Mar
+                  {formattedDate}
                 </div>
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-sm font-bold text-white shadow-[0_12px_28px_rgba(255,98,0,0.35)] sm:h-11 sm:w-11">
-                  MC
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setProfileMenuOpen((prev) => !prev)}
+                    className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-[0_12px_28px_rgba(255,98,0,0.35)] transition hover:scale-[1.02] sm:h-11 sm:w-11"
+                    aria-label="Abrir menu da conta"
+                  >
+                    <Settings className="h-5 w-5" />
+                  </button>
+
+                  {profileMenuOpen && (
+                    <div className="absolute right-0 top-[calc(100%+12px)] z-50 w-72 overflow-hidden rounded-3xl border border-white/10 bg-[#121214] p-2 shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
+                      <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                        
+                        <p className="mt-1 text-xs text-white/45">
+                          Administrador da plataforma
+                        </p>
+                      </div>
+
+                      <div className="mt-2">
+                        <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-2">
+                          <div className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-white/80">
+                            
+                            <div className="flex-1">
+                              <DashboardLogoutButton />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -505,17 +563,6 @@ export default function DashboardLayout({
           <main className="min-w-0 flex-1 overflow-x-hidden px-2.5 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
             {children}
           </main>
-
-          <div className="border-t border-white/8 p-4 lg:hidden">
-            <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.025))] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-md">
-              <p className="text-sm font-semibold text-white">Tiago Oliveira</p>
-              <p className="mt-1 text-xs text-white/45">
-                Administrador da plataforma
-              </p>
-
-              <DashboardLogoutButton />
-            </div>
-          </div>
         </div>
       </div>
     </div>

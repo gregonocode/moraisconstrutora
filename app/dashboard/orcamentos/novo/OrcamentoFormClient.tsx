@@ -54,9 +54,9 @@ type ItemState = {
   vendaUnitaria: string;
 };
 
-function createEmptyItem(): ItemState {
+function createEmptyItem(id: string): ItemState {
   return {
-    id: crypto.randomUUID(),
+    id,
     tipo: "",
     composicaoId: "",
     materialId: "",
@@ -88,9 +88,10 @@ export default function OrcamentoFormClient({
   servicos: ServicoRow[];
 }) {
   const [itens, setItens] = useState<ItemState[]>([
-    createEmptyItem(),
-    createEmptyItem(),
+    createEmptyItem("item-1"),
+    createEmptyItem("item-2"),
   ]);
+  const [nextItemNumber, setNextItemNumber] = useState(3);
 
   const totals = useMemo(() => {
     return itens.reduce(
@@ -108,7 +109,8 @@ export default function OrcamentoFormClient({
   }, [itens]);
 
   function addItem() {
-    setItens((prev) => [...prev, createEmptyItem()]);
+    setItens((prev) => [...prev, createEmptyItem(`item-${nextItemNumber}`)]);
+    setNextItemNumber((prev) => prev + 1);
   }
 
   function removeItem(id: string) {

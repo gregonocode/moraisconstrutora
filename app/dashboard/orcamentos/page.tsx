@@ -1,3 +1,4 @@
+//app/dashboard/orcamentos/page.ts
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
