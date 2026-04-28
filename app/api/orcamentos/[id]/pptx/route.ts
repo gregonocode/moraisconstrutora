@@ -1,6 +1,6 @@
 // app/api/orcamentos/[id]/pptx/route.ts
 import { NextResponse } from "next/server";
-import PptxGenJS from "pptxgenjs";
+import pptxgen from "pptxgenjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
@@ -10,6 +10,16 @@ import {
   type OrcamentoEtapaRow,
   type ClienteRow,
 } from "@/app/lib/orcamentos/export/get-orcamento-export-data"
+
+const PptxGenJS = pptxgen;
+const ShapeType = {
+  rect: "rect",
+  line: "line",
+  roundRect: "roundRect",
+} as const;
+
+type PptxDocument = InstanceType<typeof pptxgen>;
+type PptxSlide = ReturnType<PptxDocument["addSlide"]>;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -166,7 +176,7 @@ export async function GET(
       const slide = pptx.addSlide();
       slide.background = { color: colors.navy };
 
-      slide.addShape(PptxGenJS.ShapeType.rect, {
+      slide.addShape(ShapeType.rect, {
         x: 0,
         y: 0,
         w: 5.2,
@@ -175,7 +185,7 @@ export async function GET(
         line: { color: colors.navy2 },
       });
 
-      slide.addShape(PptxGenJS.ShapeType.line, {
+      slide.addShape(ShapeType.line, {
         x: 5.18,
         y: 0,
         w: 0,
@@ -218,7 +228,7 @@ export async function GET(
         breakLine: false,
       });
 
-      slide.addShape(PptxGenJS.ShapeType.line, {
+      slide.addShape(ShapeType.line, {
         x: 1.45,
         y: 3.75,
         w: 2.3,
@@ -273,7 +283,7 @@ export async function GET(
       addInfoCard(slide, 5.65, 3.95, 3.3, 0.72, "Modalidade", modalidade, colors);
       addInfoCard(slide, 5.65, 4.8, 3.3, 0.72, "Prazo", prazoEstimado, colors);
 
-      slide.addShape(PptxGenJS.ShapeType.roundRect, {
+      slide.addShape(ShapeType.roundRect, {
         x: 5.65,
         y: 5.72,
         w: 6.3,
@@ -308,7 +318,7 @@ export async function GET(
         }
       );
 
-      slide.addShape(PptxGenJS.ShapeType.rect, {
+      slide.addShape(ShapeType.rect, {
         x: 0,
         y: 7.1,
         w: 13.333,
@@ -334,7 +344,7 @@ export async function GET(
     {
       const slide = addStandardSlide(pptx, "Sobre a Moraes Construtora", colors, true);
 
-      slide.addShape(PptxGenJS.ShapeType.roundRect, {
+      slide.addShape(ShapeType.roundRect, {
         x: 0.65,
         y: 1.1,
         w: 6.2,
@@ -378,7 +388,7 @@ export async function GET(
 
       stats.forEach((stat, i) => {
         const [x, y] = statPositions[i];
-        slide.addShape(PptxGenJS.ShapeType.roundRect, {
+        slide.addShape(ShapeType.roundRect, {
           x,
           y,
           w: 2.2,
@@ -473,7 +483,7 @@ export async function GET(
 
       diferencialCards.forEach((item, i) => {
         const [x, y] = positions[i];
-        slide.addShape(PptxGenJS.ShapeType.roundRect, {
+        slide.addShape(ShapeType.roundRect, {
           x,
           y,
           w: 3.1,
@@ -483,7 +493,7 @@ export async function GET(
           line: { color: colors.border, pt: 0.5 },
         });
 
-        slide.addShape(PptxGenJS.ShapeType.rect, {
+        slide.addShape(ShapeType.rect, {
           x,
           y,
           w: 3.1,
@@ -558,7 +568,7 @@ export async function GET(
       addEscopoColumn(slide, col1, 0.75, 1.4, colors);
       addEscopoColumn(slide, col2, 6.7, 1.4, colors);
 
-      slide.addShape(PptxGenJS.ShapeType.roundRect, {
+      slide.addShape(ShapeType.roundRect, {
         x: 0.75,
         y: 5.75,
         w: 11.85,
@@ -580,7 +590,7 @@ export async function GET(
       });
 
       if (orcamento.observacoes?.trim()) {
-        slide.addShape(PptxGenJS.ShapeType.roundRect, {
+        slide.addShape(ShapeType.roundRect, {
           x: 0.75,
           y: 6.45,
           w: 11.85,
@@ -611,7 +621,7 @@ export async function GET(
         true
       );
 
-      slide.addShape(PptxGenJS.ShapeType.roundRect, {
+      slide.addShape(ShapeType.roundRect, {
         x: 0.7,
         y: 1.0,
         w: 11.95,
@@ -688,7 +698,7 @@ export async function GET(
       if (etapasResumo.length > 0) {
         let currentY = 4.25;
         etapasResumo.slice(0, 3).forEach((etapa) => {
-          slide.addShape(PptxGenJS.ShapeType.roundRect, {
+          slide.addShape(ShapeType.roundRect, {
             x: 0.75,
             y: currentY,
             w: 11.85,
@@ -775,7 +785,7 @@ export async function GET(
         const headerColor =
           i === 0 ? colors.navy : i === 1 ? "14406A" : "1A5276";
 
-        slide.addShape(PptxGenJS.ShapeType.roundRect, {
+        slide.addShape(ShapeType.roundRect, {
           x: xs[i],
           y: 1.45,
           w: 3.15,
@@ -785,7 +795,7 @@ export async function GET(
           line: { color: colors.lgray, pt: 0.5 },
         });
 
-        slide.addShape(PptxGenJS.ShapeType.rect, {
+        slide.addShape(ShapeType.rect, {
           x: xs[i],
           y: 1.45,
           w: 3.15,
@@ -872,7 +882,7 @@ export async function GET(
         });
       });
 
-      slide.addShape(PptxGenJS.ShapeType.roundRect, {
+      slide.addShape(ShapeType.roundRect, {
         x: 2.6,
         y: 6.25,
         w: 8.1,
@@ -937,7 +947,7 @@ export async function GET(
 
       const stepXs = [0.7, 3.9, 7.1, 10.3];
       proximosPassos.slice(0, 4).forEach((item, i) => {
-        slide.addShape(PptxGenJS.ShapeType.roundRect, {
+        slide.addShape(ShapeType.roundRect, {
           x: stepXs[i],
           y: 2.05,
           w: 2.35,
@@ -987,7 +997,7 @@ export async function GET(
         });
       });
 
-      slide.addShape(PptxGenJS.ShapeType.roundRect, {
+      slide.addShape(ShapeType.roundRect, {
         x: 4.25,
         y: 4.65,
         w: 4.85,
@@ -1008,7 +1018,7 @@ export async function GET(
         align: "center",
       });
 
-      slide.addShape(PptxGenJS.ShapeType.roundRect, {
+      slide.addShape(ShapeType.roundRect, {
         x: 2.55,
         y: 5.55,
         w: 8.25,
@@ -1073,7 +1083,7 @@ async function loadLogoBuffer() {
 }
 
 function addStandardSlide(
-  pptx: PptxGenJS,
+  pptx: PptxDocument,
   title: string,
   colors: Record<string, string>,
   lightBackground: boolean
@@ -1081,7 +1091,7 @@ function addStandardSlide(
   const slide = pptx.addSlide();
   slide.background = { color: lightBackground ? colors.light : colors.navy };
 
-  slide.addShape(PptxGenJS.ShapeType.rect, {
+  slide.addShape(ShapeType.rect, {
     x: 0,
     y: 0,
     w: 13.333,
@@ -1101,7 +1111,7 @@ function addStandardSlide(
     breakLine: false,
   });
 
-  slide.addShape(PptxGenJS.ShapeType.rect, {
+  slide.addShape(ShapeType.rect, {
     x: 0,
     y: 0.52,
     w: 13.333,
@@ -1110,7 +1120,7 @@ function addStandardSlide(
     line: { color: colors.navy2, pt: 0 },
   });
 
-  slide.addShape(PptxGenJS.ShapeType.rect, {
+  slide.addShape(ShapeType.rect, {
     x: 0,
     y: 0.52,
     w: 13.333,
@@ -1141,7 +1151,7 @@ function addStandardSlide(
     align: "right",
   });
 
-  slide.addShape(PptxGenJS.ShapeType.rect, {
+  slide.addShape(ShapeType.rect, {
     x: 0,
     y: 7.2,
     w: 13.333,
@@ -1171,7 +1181,7 @@ function addStandardSlide(
 }
 
 function addInfoCard(
-  slide: PptxGenJS.Slide,
+  slide: PptxSlide,
   x: number,
   y: number,
   w: number,
@@ -1180,7 +1190,7 @@ function addInfoCard(
   value: string,
   colors: Record<string, string>
 ) {
-  slide.addShape(PptxGenJS.ShapeType.roundRect, {
+  slide.addShape(ShapeType.roundRect, {
     x,
     y,
     w,
@@ -1190,7 +1200,7 @@ function addInfoCard(
     line: { color: colors.border, pt: 0.5 },
   });
 
-  slide.addShape(PptxGenJS.ShapeType.rect, {
+  slide.addShape(ShapeType.rect, {
     x,
     y,
     w: 0.05,
@@ -1223,7 +1233,7 @@ function addInfoCard(
 }
 
 function addEscopoColumn(
-  slide: PptxGenJS.Slide,
+  slide: PptxSlide,
   items: string[],
   x: number,
   startY: number,
@@ -1232,7 +1242,7 @@ function addEscopoColumn(
   let y = startY;
 
   items.forEach((item) => {
-    slide.addShape(PptxGenJS.ShapeType.rect, {
+    slide.addShape(ShapeType.rect, {
       x,
       y,
       w: 5.55,
@@ -1241,7 +1251,7 @@ function addEscopoColumn(
       line: { color: colors.lgray, pt: 0.5 },
     });
 
-    slide.addShape(PptxGenJS.ShapeType.rect, {
+    slide.addShape(ShapeType.rect, {
       x,
       y,
       w: 0.05,
@@ -1276,7 +1286,7 @@ function addEscopoColumn(
 }
 
 function addBulletColumn(
-  slide: PptxGenJS.Slide,
+  slide: PptxSlide,
   items: string[],
   x: number,
   startY: number,
