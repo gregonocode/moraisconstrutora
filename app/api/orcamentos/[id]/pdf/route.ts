@@ -313,10 +313,10 @@ export async function GET(_request: Request, context: RouteContext) {
         printBackground: true,
         preferCSSPageSize: true,
         margin: {
-          top: "0mm",
-          right: "0mm",
-          bottom: "0mm",
-          left: "0mm",
+          top: "10mm",
+          right: "10mm",
+          bottom: "10mm",
+          left: "10mm",
         },
       });
 
@@ -519,7 +519,7 @@ function buildProposalHtml({
 
     @page {
       size: A4;
-      margin: 0;
+      margin: 10mm;
     }
 
     html, body {
@@ -538,15 +538,12 @@ function buildProposalHtml({
     }
 
     .page {
-      width: 210mm;
-      min-height: 297mm;
-      page-break-after: always;
+      width: 100%;
       position: relative;
-      overflow: hidden;
-    }
-
-    .page:last-child {
+      overflow: visible;
       page-break-after: auto;
+      break-after: auto;
+      margin-bottom: 12px;
     }
 
     .nav {
@@ -586,11 +583,11 @@ function buildProposalHtml({
     }
 
     .slide {
-      min-height: calc(297mm - 14mm);
       display: flex;
       flex-direction: column;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
+      min-height: auto;
     }
 
     .slide-header {
@@ -636,7 +633,7 @@ function buildProposalHtml({
 
     .slide-body {
       flex: 1;
-      padding: 14mm 18mm;
+      padding: 10mm 12mm;
       display: flex;
       flex-direction: column;
     }
@@ -662,7 +659,7 @@ function buildProposalHtml({
     .cover {
       background: var(--navy);
       flex-direction: row;
-      min-height: calc(297mm - 14mm);
+      min-height: auto;
     }
 
     .capa-left {
@@ -672,7 +669,7 @@ function buildProposalHtml({
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 24mm 12mm 18mm;
+      padding: 14mm 10mm 12mm;
       border-right: 3px solid var(--gold);
       position: relative;
       flex-shrink: 0;
@@ -734,7 +731,7 @@ function buildProposalHtml({
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 18mm 16mm;
+      padding: 12mm 12mm;
     }
 
     .capa-label {
@@ -856,7 +853,7 @@ function buildProposalHtml({
       border-radius: 6px;
       text-align: center;
       box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      height: 150px;
+      min-height: 110px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -929,7 +926,7 @@ function buildProposalHtml({
       justify-content: center;
       text-align: center;
       gap: 6px;
-      height: 150px;
+      min-height: 120px;
     }
 
     .diff-icon {
@@ -1283,7 +1280,7 @@ function buildProposalHtml({
       justify-content: flex-start;
       text-align: center;
       gap: 8px;
-      height: 170px;
+      min-height: 140px;
     }
 
     .step-num {
