@@ -205,7 +205,7 @@ export async function GET(
         });
       }
 
-      slide.addText("MORAIS", {
+      slide.addText("MORAES", {
         x: 1.0,
         y: 3.0,
         w: 3.2,
