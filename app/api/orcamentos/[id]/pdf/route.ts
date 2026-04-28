@@ -400,7 +400,7 @@ function buildProposalHtml({
   const escopoPdf = normalizeStringArray(orcamento.escopo_pdf, []);
   const proximosPassos = normalizeStringArray(orcamento.proximos_passos, [
     "Aprovação da proposta",
-    "Assinatura do contrato",
+    "Assinatura",
     "Entrada inicial",
     "Início das obras",
   ]).slice(0, 4);

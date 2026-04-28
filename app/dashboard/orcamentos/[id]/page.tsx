@@ -339,13 +339,22 @@ export default async function OrcamentoDetalhePage({ params }: PageProps) {
               </ActionButton>
 
               <ActionButton
-             href={`/api/orcamentos/${orcamento.id}/pdf`}
-             variant="ghost"
-             target="_blank"
-             >
-            <FileDown className="h-4 w-4" />
-              PDF
-            </ActionButton>
+                href={`/api/orcamentos/${orcamento.id}/pdf`}
+                variant="ghost"
+                target="_blank"
+              >
+                <FileDown className="h-4 w-4" />
+                PDF
+              </ActionButton>
+
+              <ActionButton
+                href={`/api/orcamentos/${orcamento.id}/pptx`}
+                variant="ghost"
+                target="_blank"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                PPTX
+              </ActionButton>
 
               <ActionButton asDisabled variant="success">
                 <CheckCircle2 className="h-4 w-4" />
