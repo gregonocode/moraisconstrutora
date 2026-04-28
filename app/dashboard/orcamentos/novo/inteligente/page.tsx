@@ -1,3 +1,4 @@
+//app\dashboard\orcamentos\novo\inteligente\page.tsx
 "use client";
 
 import Link from "next/link";
@@ -17,6 +18,7 @@ import {
   Layers3,
 } from "lucide-react";
 import { createClient } from "@/app/lib/supabase/client";
+import "@/app/components/css/AmbientGlow.css";
 
 type ClienteOption = {
   id: string;
@@ -382,17 +384,21 @@ export default function NovoOrcamentoInteligentePage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <CardBlock
             title="Instruções para a IA"
-            description="Esse é o campo principal. Escreva como você falaria com o ChatGPT ou Claude."
+            description="Esse é o campo principal. Escreva como você falaria com a Claude."
           >
             <div className="space-y-4">
               <Field label="Prompt principal *">
-                <textarea
-                  value={descricaoSolicitacao}
-                  onChange={(e) => setDescricaoSolicitacao(e.target.value)}
-                  placeholder="Ex: criar proposta para construção residencial do cliente João, casa térrea com 3 quartos, acabamento médio. Quero proposta mais comercial, dividir em 3 etapas, considerar mão de obra e equipamentos. O piso dessa obra deve entrar com preço especial abaixo do valor padrão."
-                  className={`${inputClassName} min-h-[220px] resize-y`}
-                  required
-                />
+                <div className="prompt-aurora-wrap">
+                  <div className="prompt-aurora-light" />
+
+                  <textarea
+                    value={descricaoSolicitacao}
+                    onChange={(e) => setDescricaoSolicitacao(e.target.value)}
+                    placeholder="Ex: criar proposta para construção residencial do cliente João, casa térrea com 3 quartos, acabamento médio. Quero proposta mais comercial, dividir em 3 etapas, considerar mão de obra e equipamentos. O piso dessa obra deve entrar com preço especial abaixo do valor padrão."
+                    className={`${inputClassName} prompt-aurora-input min-h-[220px] resize-y`}
+                    required
+                  />
+                </div>
               </Field>
 
               <div className="rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-sm text-white/55">
@@ -858,8 +864,10 @@ function CardBlock({
   children: React.ReactNode;
 }) {
   return (
-    <section className="relative overflow-hidden rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5 lg:p-6">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_30%,transparent_70%,rgba(255,255,255,0.015))]" />
+    <section className="relative overflow-visible rounded-[20px] border border-white/5 bg-[#252525] p-4 shadow-lg sm:rounded-[28px] sm:p-5 lg:p-6">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,80,23,0.08),transparent_40%),linear-gradient(to_bottom,rgba(255,255,255,0.03),transparent_30%,transparent_70%,rgba(255,255,255,0.015))]" />
+      </div>
       <div className="relative z-10">
         <div className="mb-5">
           <h2 className="text-lg font-semibold text-white">{title}</h2>
