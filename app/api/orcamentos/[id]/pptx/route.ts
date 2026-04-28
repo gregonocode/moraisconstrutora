@@ -39,11 +39,9 @@ export async function GET(
     pptx.company = "Moraes Construtora";
     pptx.subject = orcamento.titulo || "Proposta Comercial";
     pptx.title = orcamento.titulo || "Proposta Comercial";
-    pptx.lang = "pt-BR";
     pptx.theme = {
       headFontFace: "Aptos",
       bodyFontFace: "Aptos",
-      lang: "pt-BR",
     };
 
     const colors = {
@@ -192,7 +190,7 @@ export async function GET(
           y: 0.75,
           w: 2.8,
           h: 2.2,
-          contain: true,
+          sizing: { type: "contain", x: 1.15, y: 0.75, w: 2.8, h: 2.2 },
         });
       }
 
@@ -236,7 +234,7 @@ export async function GET(
         fontSize: 9,
         color: colors.muted,
         align: "center",
-        valign: "mid",
+        valign: "middle",
       });
 
       slide.addText("Proposta Comercial", {
@@ -399,7 +397,7 @@ export async function GET(
           bold: true,
           color: colors.navy,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           fill: { color: colors.gold },
           margin: 0,
         });
@@ -423,7 +421,7 @@ export async function GET(
           fontSize: 8.2,
           color: colors.muted,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           margin: 0,
         });
       });
@@ -503,7 +501,7 @@ export async function GET(
           bold: true,
           color: colors.navy,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           fill: { color: colors.gold },
           margin: 0,
         });
@@ -527,7 +525,7 @@ export async function GET(
           fontSize: 7.9,
           color: colors.muted,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           margin: 0.03,
         });
       });
@@ -632,7 +630,7 @@ export async function GET(
         bold: true,
         color: colors.navy,
         align: "center",
-        valign: "mid",
+        valign: "middle",
         fill: { color: colors.gold },
       });
 
@@ -805,7 +803,7 @@ export async function GET(
           bold: true,
           color: colors.navy,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           fill: { color: colors.gold },
           margin: 0,
         });
@@ -958,7 +956,7 @@ export async function GET(
           bold: true,
           color: colors.navy,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           fill: { color: colors.gold },
           margin: 0,
         });
@@ -972,7 +970,7 @@ export async function GET(
           bold: true,
           color: colors.white,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           margin: 0,
         });
 
@@ -984,7 +982,7 @@ export async function GET(
           fontSize: 7.4,
           color: colors.muted,
           align: "center",
-          valign: "mid",
+          valign: "middle",
           margin: 0.03,
         });
       });
@@ -1034,15 +1032,20 @@ export async function GET(
       );
     }
 
-    const buffer = await pptx.write({
+    const buffer = (await pptx.write({
       outputType: "nodebuffer",
-    });
+    })) as Buffer;
+
+    const responseBody = buffer.buffer.slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength
+    ) as ArrayBuffer;
 
     const filename = sanitizeFilename(
       `${orcamento.codigo ?? "orcamento"}-${orcamento.titulo}.pptx`
     );
 
-    return new NextResponse(buffer, {
+    return new NextResponse(responseBody, {
       status: 200,
       headers: {
         "Content-Type":
