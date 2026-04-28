@@ -399,49 +399,31 @@ export async function GET(
           line: { color: colors.navy2, pt: 0.5 },
         });
 
-        slide.addShape(ShapeType.ellipse, {
-          x: x + 0.78,
-          y: y + 0.18,
-          w: 0.64,
-          h: 0.42,
-          fill: { color: colors.gold },
-          line: { color: colors.gold, pt: 0 },
-        });
-
-        slide.addText(stat.icon, {
-          x: x + 0.72,
-          y: y + 0.24,
-          w: 0.76,
-          h: 0.18,
-          fontSize: 11,
-          bold: true,
-          color: colors.navy,
-          align: "center",
-          valign: "middle",
-          margin: 0,
-        });
+        addNumberCircle(slide, x + 0.82, y + 0.18, 0.56, stat.icon, colors, 9);
 
         slide.addText(stat.num, {
           x: x + 0.2,
-          y: y + 0.78,
+          y: y + 0.82,
           w: 1.8,
-          h: 0.32,
+          h: 0.35,
           fontSize: 20,
           bold: true,
           color: colors.gold,
           align: "center",
+          margin: 0,
         });
 
         slide.addText(stat.label, {
-          x: x + 0.18,
-          y: y + 1.2,
-          w: 1.85,
-          h: 0.58,
-          fontSize: 8.2,
+          x: x + 0.16,
+          y: y + 1.38,
+          w: 1.88,
+          h: 0.42,
+          fontSize: 7.8,
           color: colors.muted,
           align: "center",
           valign: "middle",
           margin: 0,
+          fit: "shrink",
         });
       });
     }
@@ -511,49 +493,32 @@ export async function GET(
           line: { color: colors.gold, pt: 0 },
         });
 
-        slide.addShape(ShapeType.ellipse, {
-          x: x + 1.24,
-          y: y + 0.14,
-          w: 0.58,
-          h: 0.42,
-          fill: { color: colors.gold },
-          line: { color: colors.gold, pt: 0 },
-        });
-
-        slide.addText(item.icon, {
-          x: x + 1.08,
-          y: y + 0.21,
-          w: 0.9,
-          h: 0.18,
-          fontSize: 11,
-          bold: true,
-          color: colors.navy,
-          align: "center",
-          valign: "middle",
-          margin: 0,
-        });
+        addNumberCircle(slide, x + 1.27, y + 0.13, 0.52, item.icon, colors, 8.5);
 
         slide.addText(item.title, {
           x: x + 0.22,
-          y: y + 0.63,
+          y: y + 0.72,
           w: 2.65,
           h: 0.25,
           fontSize: 10.5,
           bold: true,
           color: colors.white,
           align: "center",
+          margin: 0,
+          fit: "shrink",
         });
 
         slide.addText(item.desc, {
           x: x + 0.18,
-          y: y + 0.96,
+          y: y + 1.08,
           w: 2.75,
-          h: 0.65,
-          fontSize: 7.9,
+          h: 0.55,
+          fontSize: 7.4,
           color: colors.muted,
           align: "center",
           valign: "middle",
-          margin: 0.03,
+          margin: 0.02,
+          fit: "shrink",
         });
       });
     }
@@ -571,23 +536,26 @@ export async function GET(
         "Tudo o que está incluso na proposta comercial para esta contratação:",
         {
           x: 0.8,
-          y: 1.0,
-          w: 8.0,
-          h: 0.25,
-          fontSize: 10,
+          y: 1.32,
+          w: 8.5,
+          h: 0.22,
+          fontSize: 9.5,
           color: colors.gray,
+          margin: 0,
+          breakLine: false,
+          fit: "shrink",
         }
       );
 
       const col1 = escopoLista.slice(0, Math.ceil(escopoLista.length / 2));
       const col2 = escopoLista.slice(Math.ceil(escopoLista.length / 2));
 
-      addEscopoColumn(slide, col1, 0.75, 1.4, colors);
-      addEscopoColumn(slide, col2, 6.7, 1.4, colors);
+      addEscopoColumn(slide, col1, 0.75, 1.68, colors);
+      addEscopoColumn(slide, col2, 6.7, 1.68, colors);
 
       slide.addShape(ShapeType.roundRect, {
         x: 0.75,
-        y: 5.75,
+        y: 5.88,
         w: 11.85,
         h: 0.55,
         rectRadius: 0.04,
@@ -597,7 +565,7 @@ export async function GET(
 
       slide.addText(`✔ ${garantiaTexto}`, {
         x: 0.98,
-        y: 5.93,
+        y: 6.06,
         w: 11.2,
         h: 0.15,
         fontSize: 9,
@@ -648,27 +616,27 @@ export async function GET(
         line: { color: colors.navy, pt: 0.5 },
       });
 
-      slide.addShape(ShapeType.roundRect, {
+      slide.addShape(ShapeType.ellipse, {
         x: 0.88,
-        y: 1.23,
-        w: 0.54,
-        h: 0.42,
-        rectRadius: 0.08,
+        y: 1.2,
+        w: 0.55,
+        h: 0.55,
         fill: { color: colors.gold },
-        line: { color: colors.gold, pt: 0 },
+        line: { color: colors.gold, transparency: 100 },
       });
 
       slide.addText("$", {
-        x: 0.92,
+        x: 0.88,
         y: 1.34,
-        w: 0.45,
+        w: 0.55,
         h: 0.18,
-        fontSize: 18,
+        fontSize: 17,
         bold: true,
         color: colors.navy,
         align: "center",
         valign: "middle",
         margin: 0,
+        breakLine: false,
       });
 
       slide.addText("Valor Total do Contrato", {
@@ -954,23 +922,26 @@ export async function GET(
 
       slide.addText("Vamos Começar?", {
         x: 4.2,
-        y: 0.95,
+        y: 1.28,
         w: 4.9,
         h: 0.35,
         fontSize: 24,
         bold: true,
         color: colors.white,
         align: "center",
+        margin: 0,
+        fit: "shrink",
       });
 
       slide.addText("Próximos passos para iniciar sua obra", {
         x: 3.7,
-        y: 1.35,
+        y: 1.68,
         w: 5.9,
         h: 0.18,
         fontSize: 10,
         color: colors.gold,
         align: "center",
+        margin: 0,
       });
 
       const titles = [
@@ -984,7 +955,7 @@ export async function GET(
       proximosPassos.slice(0, 4).forEach((item, i) => {
         slide.addShape(ShapeType.roundRect, {
           x: stepXs[i],
-          y: 2.05,
+          y: 2.35,
           w: 2.35,
           h: 2.15,
           rectRadius: 0.05,
@@ -992,31 +963,11 @@ export async function GET(
           line: { color: colors.border, pt: 0.5 },
         });
 
-        slide.addShape(ShapeType.ellipse, {
-          x: stepXs[i] + 0.96,
-          y: 2.18,
-          w: 0.42,
-          h: 0.42,
-          fill: { color: colors.gold },
-          line: { color: colors.gold, pt: 0 },
-        });
-
-        slide.addText(String(i + 1), {
-          x: stepXs[i] + 0.96,
-          y: 2.30,
-          w: 0.42,
-          h: 0.12,
-          fontSize: 11,
-          bold: true,
-          color: colors.navy,
-          align: "center",
-          valign: "middle",
-          margin: 0,
-        });
+        addNumberCircle(slide, stepXs[i] + 0.94, 2.48, 0.46, String(i + 1), colors, 9);
 
         slide.addText(titles[i] ?? `Passo ${i + 1}`, {
           x: stepXs[i] + 0.15,
-          y: 2.75,
+          y: 3.05,
           w: 2.05,
           h: 0.34,
           fontSize: 8.8,
@@ -1025,11 +976,12 @@ export async function GET(
           align: "center",
           valign: "middle",
           margin: 0,
+          fit: "shrink",
         });
 
         slide.addText(item, {
           x: stepXs[i] + 0.12,
-          y: 3.18,
+          y: 3.48,
           w: 2.1,
           h: 0.62,
           fontSize: 7.4,
@@ -1037,12 +989,13 @@ export async function GET(
           align: "center",
           valign: "middle",
           margin: 0.03,
+          fit: "shrink",
         });
       });
 
       slide.addShape(ShapeType.roundRect, {
         x: 4.25,
-        y: 4.65,
+        y: 4.85,
         w: 4.85,
         h: 0.48,
         rectRadius: 0.05,
@@ -1052,7 +1005,7 @@ export async function GET(
 
       slide.addText("Solicitar Aprovação da Proposta", {
         x: 4.4,
-        y: 4.82,
+        y: 5.02,
         w: 4.55,
         h: 0.14,
         fontSize: 9,
@@ -1221,6 +1174,40 @@ function addStandardSlide(
   );
 
   return slide;
+}
+
+function addNumberCircle(
+  slide: PptxSlide,
+  x: number,
+  y: number,
+  size: number,
+  text: string,
+  colors: Record<string, string>,
+  fontSize = 9
+) {
+  slide.addShape(ShapeType.ellipse, {
+    x,
+    y,
+    w: size,
+    h: size,
+    fill: { color: colors.gold },
+    line: { color: colors.gold, transparency: 100 },
+  });
+
+  slide.addText(text, {
+    x,
+    y: y + size * 0.28,
+    w: size,
+    h: size * 0.32,
+    fontSize,
+    bold: true,
+    color: colors.navy,
+    align: "center",
+    valign: "middle",
+    margin: 0,
+    breakLine: false,
+    fit: "shrink",
+  });
 }
 
 function addInfoCard(
