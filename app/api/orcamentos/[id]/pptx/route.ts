@@ -16,6 +16,7 @@ const ShapeType = {
   rect: "rect",
   line: "line",
   roundRect: "roundRect",
+  ellipse: "ellipse",
 } as const;
 
 type PptxDocument = InstanceType<typeof pptxgen>;
@@ -398,12 +399,11 @@ export async function GET(
           line: { color: colors.navy2, pt: 0.5 },
         });
 
-        slide.addShape(ShapeType.roundRect, {
-          x: x + 0.72,
+        slide.addShape(ShapeType.ellipse, {
+          x: x + 0.78,
           y: y + 0.18,
-          w: 0.76,
+          w: 0.64,
           h: 0.42,
-          rectRadius: 0.08,
           fill: { color: colors.gold },
           line: { color: colors.gold, pt: 0 },
         });
@@ -511,12 +511,11 @@ export async function GET(
           line: { color: colors.gold, pt: 0 },
         });
 
-        slide.addShape(ShapeType.roundRect, {
-          x: x + 1.08,
+        slide.addShape(ShapeType.ellipse, {
+          x: x + 1.24,
           y: y + 0.14,
-          w: 0.9,
+          w: 0.58,
           h: 0.42,
-          rectRadius: 0.08,
           fill: { color: colors.gold },
           line: { color: colors.gold, pt: 0 },
         });
@@ -832,22 +831,21 @@ export async function GET(
           line: { color: headerColor, pt: 0 },
         });
 
-        slide.addShape(ShapeType.roundRect, {
-          x: xs[i] + 0.12,
+        slide.addShape(ShapeType.ellipse, {
+          x: xs[i] + 0.13,
           y: 1.58,
-          w: 0.56,
+          w: 0.42,
           h: 0.42,
-          rectRadius: 0.08,
           fill: { color: colors.gold },
           line: { color: colors.gold, pt: 0 },
         });
 
         slide.addText(String(i + 1).padStart(2, "0"), {
-          x: xs[i] + 0.18,
-          y: 1.72,
-          w: 0.45,
-          h: 0.14,
-          fontSize: 10,
+          x: xs[i] + 0.13,
+          y: 1.70,
+          w: 0.42,
+          h: 0.12,
+          fontSize: 9,
           bold: true,
           color: colors.navy,
           align: "center",
@@ -994,22 +992,21 @@ export async function GET(
           line: { color: colors.border, pt: 0.5 },
         });
 
-        slide.addShape(ShapeType.roundRect, {
-          x: stepXs[i] + 0.84,
+        slide.addShape(ShapeType.ellipse, {
+          x: stepXs[i] + 0.96,
           y: 2.18,
-          w: 0.66,
+          w: 0.42,
           h: 0.42,
-          rectRadius: 0.16,
           fill: { color: colors.gold },
           line: { color: colors.gold, pt: 0 },
         });
 
         slide.addText(String(i + 1), {
-          x: stepXs[i] + 0.84,
-          y: 2.25,
-          w: 0.66,
-          h: 0.18,
-          fontSize: 13,
+          x: stepXs[i] + 0.96,
+          y: 2.30,
+          w: 0.42,
+          h: 0.12,
+          fontSize: 11,
           bold: true,
           color: colors.navy,
           align: "center",
