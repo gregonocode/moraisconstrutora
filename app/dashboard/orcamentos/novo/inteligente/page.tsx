@@ -401,18 +401,7 @@ export default function NovoOrcamentoInteligentePage() {
                 </div>
               </Field>
 
-              <div className="rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-sm text-white/55">
-                <p className="font-medium text-white/75">
-                  Exemplos do que você pode escrever:
-                </p>
-                <div className="mt-3 space-y-2">
-                  <p>• “Para esse cliente, reduzir o valor do piso em relação à composição padrão.”</p>
-                  <p>• “Quero uma proposta mais comercial e menos técnica.”</p>
-                  <p>• “Não incluir materiais hidráulicos.”</p>
-                  <p>• “Dividir em 3 etapas de pagamento com entrada menor.”</p>
-                  <p>• “Usar acabamento premium e destacar prazo e garantia.”</p>
-                </div>
-              </div>
+             
             </div>
           </CardBlock>
 
