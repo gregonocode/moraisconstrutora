@@ -308,10 +308,26 @@ export async function GET(_request: Request, context: RouteContext) {
         waitUntil: "networkidle0",
       });
 
+      const bodyHeight = await page.evaluate(() => {
+        const body = document.body;
+        const html = document.documentElement;
+
+        return Math.ceil(
+          Math.max(
+            body.scrollHeight,
+            body.offsetHeight,
+            html.clientHeight,
+            html.scrollHeight,
+            html.offsetHeight
+          )
+        );
+      });
+
       const pdf = await page.pdf({
-        format: "A4",
+        width: "210mm",
+        height: `${bodyHeight}px`,
         printBackground: true,
-        preferCSSPageSize: true,
+        preferCSSPageSize: false,
         margin: {
           top: "0mm",
           right: "0mm",
@@ -518,7 +534,6 @@ function buildProposalHtml({
     }
 
     @page {
-      size: A4;
       margin: 0;
     }
 
@@ -538,9 +553,15 @@ function buildProposalHtml({
     }
 
     .page {
-      width: 100%;
+      width: 210mm;
       position: relative;
       overflow: visible;
+      break-inside: avoid;
+      page-break-after: auto;
+    }
+
+    .page + .page {
+      margin-top: 0;
     }
 
     .nav {
@@ -551,6 +572,7 @@ function buildProposalHtml({
       justify-content: space-between;
       padding: 0 18mm;
       height: 14mm;
+      margin: 0;
     }
 
     .nav-brand {
@@ -584,21 +606,18 @@ function buildProposalHtml({
       flex-direction: column;
       position: relative;
       overflow: visible;
-      min-height: auto;
-      break-inside: auto;
-      page-break-inside: auto;
-      margin-bottom: 10px;
     }
 
     .slide-header {
       background: var(--navy2);
       border-top: 4px solid var(--gold);
-      padding: 0 12mm;
-      min-height: 12mm;
+      padding: 0 18mm;
+      min-height: 16mm;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
+      margin: 0;
     }
 
     .slide-header h2 {
@@ -632,8 +651,7 @@ function buildProposalHtml({
     }
 
     .slide-body {
-      flex: 1;
-      padding: 8mm 12mm;
+      padding: 10mm 18mm;
       display: flex;
       flex-direction: column;
     }
@@ -647,6 +665,7 @@ function buildProposalHtml({
       font-weight: 700;
       letter-spacing: 0.04em;
       flex-shrink: 0;
+      margin: 0;
     }
 
     .slide-footer.dark {
@@ -658,10 +677,7 @@ function buildProposalHtml({
     /* CAPA */
     .cover {
       background: var(--navy);
-      display: flex;
       flex-direction: row;
-      align-items: stretch;
-      min-height: auto;
     }
 
     .capa-left {
@@ -671,7 +687,7 @@ function buildProposalHtml({
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 12mm 8mm 10mm;
+      padding: 24mm 12mm 18mm;
       border-right: 3px solid var(--gold);
       position: relative;
       flex-shrink: 0;
@@ -733,7 +749,7 @@ function buildProposalHtml({
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 10mm 10mm;
+      padding: 18mm 16mm;
     }
 
     .capa-label {
@@ -797,8 +813,7 @@ function buildProposalHtml({
       font-size: 9px;
       color: var(--navy);
       font-weight: 700;
-      position: static;
-      margin-top: 12px;
+      width: 100%;
     }
 
     /* GERAIS */
@@ -853,7 +868,7 @@ function buildProposalHtml({
       border-radius: 6px;
       text-align: center;
       box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      min-height: 110px;
+      height: 150px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -926,7 +941,7 @@ function buildProposalHtml({
       justify-content: center;
       text-align: center;
       gap: 6px;
-      min-height: 120px;
+      height: 150px;
     }
 
     .diff-icon {
@@ -1280,7 +1295,7 @@ function buildProposalHtml({
       justify-content: flex-start;
       text-align: center;
       gap: 8px;
-      min-height: 140px;
+      height: 170px;
     }
 
     .step-num {
@@ -1469,23 +1484,20 @@ function buildProposalHtml({
       color: var(--gray);
       line-height: 1.6;
     }
-
-    .stat-card,
-    .diff-card,
-    .fluxo-card,
-    .step-card,
-    .stage-card,
-    .invest-hero,
-    .sobre-text,
-    .cliente-box,
-    .obs-box {
-      break-inside: avoid;
-      page-break-inside: avoid;
-    }
   </style>
 </head>
 <body>
+
+  <!-- PÁGINA 1 -->
   <div class="page">
+    <div class="nav">
+      <span class="nav-brand">Moraes Construtora</span>
+      <div class="nav-arrows">
+        <span class="nav-btn">←</span>
+        <span class="nav-btn">→</span>
+      </div>
+    </div>
+
     <section class="slide cover">
       <div class="capa-left">
         <div class="capa-logo">
@@ -1546,10 +1558,22 @@ function buildProposalHtml({
         </div>
       </div>
 
-      <div class="capa-footer">
-        ${escapeHtml(validadeTexto)} • ${escapeHtml(responsavelNome)}
-      </div>
     </section>
+
+    <div class="capa-footer">
+      ${escapeHtml(validadeTexto)} • ${escapeHtml(responsavelNome)}
+    </div>
+  </div>
+
+  <!-- PÁGINA 2 -->
+  <div class="page">
+    <div class="nav">
+      <span class="nav-brand">Moraes Construtora</span>
+      <div class="nav-arrows">
+        <span class="nav-btn">←</span>
+        <span class="nav-btn">→</span>
+      </div>
+    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1596,6 +1620,17 @@ function buildProposalHtml({
 
       <div class="slide-footer dark">Moraes Construtora • Proposta Comercial</div>
     </section>
+  </div>
+
+  <!-- PÁGINA 3 -->
+  <div class="page">
+    <div class="nav">
+      <span class="nav-brand">Moraes Construtora</span>
+      <div class="nav-arrows">
+        <span class="nav-btn">←</span>
+        <span class="nav-btn">→</span>
+      </div>
+    </div>
 
     <section class="slide dark-bg">
       <div class="slide-header">
@@ -1626,6 +1661,17 @@ function buildProposalHtml({
 
       <div class="slide-footer">Moraes Construtora • Qualidade que você vê e sente</div>
     </section>
+  </div>
+
+  <!-- PÁGINA 4 -->
+  <div class="page">
+    <div class="nav">
+      <span class="nav-brand">Moraes Construtora</span>
+      <div class="nav-arrows">
+        <span class="nav-btn">←</span>
+        <span class="nav-btn">→</span>
+      </div>
+    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1670,6 +1716,17 @@ function buildProposalHtml({
 
       <div class="slide-footer dark">Moraes Construtora • Proposta Comercial</div>
     </section>
+  </div>
+
+  <!-- PÁGINA 5 -->
+  <div class="page">
+    <div class="nav">
+      <span class="nav-brand">Moraes Construtora</span>
+      <div class="nav-arrows">
+        <span class="nav-btn">←</span>
+        <span class="nav-btn">→</span>
+      </div>
+    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1760,6 +1817,17 @@ function buildProposalHtml({
 
       <div class="slide-footer">Proposta válida conforme condições comerciais</div>
     </section>
+  </div>
+
+  <!-- PÁGINA 6 -->
+  <div class="page">
+    <div class="nav">
+      <span class="nav-brand">Moraes Construtora</span>
+      <div class="nav-arrows">
+        <span class="nav-btn">←</span>
+        <span class="nav-btn">→</span>
+      </div>
+    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1818,6 +1886,17 @@ function buildProposalHtml({
 
       <div class="slide-footer dark">Moraes Construtora • Proposta Comercial</div>
     </section>
+  </div>
+
+  <!-- PÁGINA 7 -->
+  <div class="page">
+    <div class="nav">
+      <span class="nav-brand">Moraes Construtora</span>
+      <div class="nav-arrows">
+        <span class="nav-btn">←</span>
+        <span class="nav-btn">→</span>
+      </div>
+    </div>
 
     <section class="slide dark-bg">
       <div class="slide-header" style="background: var(--navy2);">
