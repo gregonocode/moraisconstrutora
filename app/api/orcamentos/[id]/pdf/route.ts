@@ -313,10 +313,10 @@ export async function GET(_request: Request, context: RouteContext) {
         printBackground: true,
         preferCSSPageSize: true,
         margin: {
-          top: "10mm",
-          right: "10mm",
-          bottom: "10mm",
-          left: "10mm",
+          top: "0mm",
+          right: "0mm",
+          bottom: "0mm",
+          left: "0mm",
         },
       });
 
@@ -519,7 +519,7 @@ function buildProposalHtml({
 
     @page {
       size: A4;
-      margin: 10mm;
+      margin: 0;
     }
 
     html, body {
@@ -541,9 +541,6 @@ function buildProposalHtml({
       width: 100%;
       position: relative;
       overflow: visible;
-      page-break-after: auto;
-      break-after: auto;
-      margin-bottom: 12px;
     }
 
     .nav {
@@ -588,13 +585,16 @@ function buildProposalHtml({
       position: relative;
       overflow: visible;
       min-height: auto;
+      break-inside: auto;
+      page-break-inside: auto;
+      margin-bottom: 10px;
     }
 
     .slide-header {
       background: var(--navy2);
       border-top: 4px solid var(--gold);
-      padding: 0 18mm;
-      min-height: 16mm;
+      padding: 0 12mm;
+      min-height: 12mm;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -633,7 +633,7 @@ function buildProposalHtml({
 
     .slide-body {
       flex: 1;
-      padding: 10mm 12mm;
+      padding: 8mm 12mm;
       display: flex;
       flex-direction: column;
     }
@@ -658,7 +658,9 @@ function buildProposalHtml({
     /* CAPA */
     .cover {
       background: var(--navy);
+      display: flex;
       flex-direction: row;
+      align-items: stretch;
       min-height: auto;
     }
 
@@ -669,7 +671,7 @@ function buildProposalHtml({
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 14mm 10mm 12mm;
+      padding: 12mm 8mm 10mm;
       border-right: 3px solid var(--gold);
       position: relative;
       flex-shrink: 0;
@@ -731,7 +733,7 @@ function buildProposalHtml({
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 12mm 12mm;
+      padding: 10mm 10mm;
     }
 
     .capa-label {
@@ -795,10 +797,8 @@ function buildProposalHtml({
       font-size: 9px;
       color: var(--navy);
       font-weight: 700;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      position: static;
+      margin-top: 12px;
     }
 
     /* GERAIS */
@@ -1469,20 +1469,23 @@ function buildProposalHtml({
       color: var(--gray);
       line-height: 1.6;
     }
+
+    .stat-card,
+    .diff-card,
+    .fluxo-card,
+    .step-card,
+    .stage-card,
+    .invest-hero,
+    .sobre-text,
+    .cliente-box,
+    .obs-box {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
   </style>
 </head>
 <body>
-
-  <!-- PÁGINA 1 -->
   <div class="page">
-    <div class="nav">
-      <span class="nav-brand">Moraes Construtora</span>
-      <div class="nav-arrows">
-        <span class="nav-btn">←</span>
-        <span class="nav-btn">→</span>
-      </div>
-    </div>
-
     <section class="slide cover">
       <div class="capa-left">
         <div class="capa-logo">
@@ -1547,17 +1550,6 @@ function buildProposalHtml({
         ${escapeHtml(validadeTexto)} • ${escapeHtml(responsavelNome)}
       </div>
     </section>
-  </div>
-
-  <!-- PÁGINA 2 -->
-  <div class="page">
-    <div class="nav">
-      <span class="nav-brand">Moraes Construtora</span>
-      <div class="nav-arrows">
-        <span class="nav-btn">←</span>
-        <span class="nav-btn">→</span>
-      </div>
-    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1604,17 +1596,6 @@ function buildProposalHtml({
 
       <div class="slide-footer dark">Moraes Construtora • Proposta Comercial</div>
     </section>
-  </div>
-
-  <!-- PÁGINA 3 -->
-  <div class="page">
-    <div class="nav">
-      <span class="nav-brand">Moraes Construtora</span>
-      <div class="nav-arrows">
-        <span class="nav-btn">←</span>
-        <span class="nav-btn">→</span>
-      </div>
-    </div>
 
     <section class="slide dark-bg">
       <div class="slide-header">
@@ -1645,17 +1626,6 @@ function buildProposalHtml({
 
       <div class="slide-footer">Moraes Construtora • Qualidade que você vê e sente</div>
     </section>
-  </div>
-
-  <!-- PÁGINA 4 -->
-  <div class="page">
-    <div class="nav">
-      <span class="nav-brand">Moraes Construtora</span>
-      <div class="nav-arrows">
-        <span class="nav-btn">←</span>
-        <span class="nav-btn">→</span>
-      </div>
-    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1700,17 +1670,6 @@ function buildProposalHtml({
 
       <div class="slide-footer dark">Moraes Construtora • Proposta Comercial</div>
     </section>
-  </div>
-
-  <!-- PÁGINA 5 -->
-  <div class="page">
-    <div class="nav">
-      <span class="nav-brand">Moraes Construtora</span>
-      <div class="nav-arrows">
-        <span class="nav-btn">←</span>
-        <span class="nav-btn">→</span>
-      </div>
-    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1801,17 +1760,6 @@ function buildProposalHtml({
 
       <div class="slide-footer">Proposta válida conforme condições comerciais</div>
     </section>
-  </div>
-
-  <!-- PÁGINA 6 -->
-  <div class="page">
-    <div class="nav">
-      <span class="nav-brand">Moraes Construtora</span>
-      <div class="nav-arrows">
-        <span class="nav-btn">←</span>
-        <span class="nav-btn">→</span>
-      </div>
-    </div>
 
     <section class="slide light-bg">
       <div class="slide-header">
@@ -1870,17 +1818,6 @@ function buildProposalHtml({
 
       <div class="slide-footer dark">Moraes Construtora • Proposta Comercial</div>
     </section>
-  </div>
-
-  <!-- PÁGINA 7 -->
-  <div class="page">
-    <div class="nav">
-      <span class="nav-brand">Moraes Construtora</span>
-      <div class="nav-arrows">
-        <span class="nav-btn">←</span>
-        <span class="nav-btn">→</span>
-      </div>
-    </div>
 
     <section class="slide dark-bg">
       <div class="slide-header" style="background: var(--navy2);">
