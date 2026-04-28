@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import {
-  Bot,
   CalendarDays,
   Eye,
   FileDown,
@@ -13,10 +12,10 @@ import {
   Plus,
   Search,
   Sparkles,
-  Trash2,
   User2,
 } from "lucide-react";
 import { createClient } from "@/app/lib/supabase/server";
+import { DeleteOrcamentoButton } from "./DeleteOrcamentoButton";
 
 type SearchParams = {
   q?: string;
@@ -137,7 +136,7 @@ export default async function OrcamentosPage({ searchParams }: PageProps) {
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <ActionCard
-          href="/dashboard/orcamentos/novo?modo=ia"
+          href="/dashboard/orcamentos/novo/inteligente"
           title="Novo Orçamento Inteligente"
           description="Gere um orçamento com apoio de IA a partir das informações principais da proposta."
           icon={<Sparkles className="h-5 w-5" />}
@@ -357,13 +356,10 @@ export default async function OrcamentosPage({ searchParams }: PageProps) {
                               <FileDown className="h-4 w-4" />
                             </button>
 
-                            <button
-                              type="button"
-                              title="Excluir"
-                              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/5 bg-white/[0.04] text-white/70 transition hover:bg-white/[0.08] hover:text-white"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                            <DeleteOrcamentoButton
+                              orcamentoId={item.id}
+                              label={(item.codigo ?? "Sem código") + " · " + item.titulo}
+                            />
                           </div>
                         </td>
                       </tr>
