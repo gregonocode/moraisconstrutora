@@ -398,17 +398,26 @@ export async function GET(
           line: { color: colors.navy2, pt: 0.5 },
         });
 
+        slide.addShape(ShapeType.roundRect, {
+          x: x + 0.72,
+          y: y + 0.18,
+          w: 0.76,
+          h: 0.42,
+          rectRadius: 0.08,
+          fill: { color: colors.gold },
+          line: { color: colors.gold, pt: 0 },
+        });
+
         slide.addText(stat.icon, {
-          x: x + 0.78,
-          y: y + 0.22,
-          w: 0.64,
-          h: 0.34,
+          x: x + 0.72,
+          y: y + 0.24,
+          w: 0.76,
+          h: 0.18,
           fontSize: 11,
           bold: true,
           color: colors.navy,
           align: "center",
           valign: "middle",
-          fill: { color: colors.gold },
           margin: 0,
         });
 
@@ -502,17 +511,26 @@ export async function GET(
           line: { color: colors.gold, pt: 0 },
         });
 
+        slide.addShape(ShapeType.roundRect, {
+          x: x + 1.08,
+          y: y + 0.14,
+          w: 0.9,
+          h: 0.42,
+          rectRadius: 0.08,
+          fill: { color: colors.gold },
+          line: { color: colors.gold, pt: 0 },
+        });
+
         slide.addText(item.icon, {
-          x: x + 1.16,
-          y: y + 0.17,
-          w: 0.78,
-          h: 0.35,
+          x: x + 1.08,
+          y: y + 0.21,
+          w: 0.9,
+          h: 0.18,
           fontSize: 11,
           bold: true,
           color: colors.navy,
           align: "center",
           valign: "middle",
-          fill: { color: colors.gold },
           margin: 0,
         });
 
@@ -631,17 +649,27 @@ export async function GET(
         line: { color: colors.navy, pt: 0.5 },
       });
 
+      slide.addShape(ShapeType.roundRect, {
+        x: 0.88,
+        y: 1.23,
+        w: 0.54,
+        h: 0.42,
+        rectRadius: 0.08,
+        fill: { color: colors.gold },
+        line: { color: colors.gold, pt: 0 },
+      });
+
       slide.addText("$", {
         x: 0.92,
-        y: 1.28,
+        y: 1.34,
         w: 0.45,
-        h: 0.32,
+        h: 0.18,
         fontSize: 18,
         bold: true,
         color: colors.navy,
         align: "center",
         valign: "middle",
-        fill: { color: colors.gold },
+        margin: 0,
       });
 
       slide.addText("Valor Total do Contrato", {
@@ -804,17 +832,26 @@ export async function GET(
           line: { color: headerColor, pt: 0 },
         });
 
+        slide.addShape(ShapeType.roundRect, {
+          x: xs[i] + 0.12,
+          y: 1.58,
+          w: 0.56,
+          h: 0.42,
+          rectRadius: 0.08,
+          fill: { color: colors.gold },
+          line: { color: colors.gold, pt: 0 },
+        });
+
         slide.addText(String(i + 1).padStart(2, "0"), {
           x: xs[i] + 0.18,
-          y: 1.66,
+          y: 1.72,
           w: 0.45,
-          h: 0.26,
+          h: 0.14,
           fontSize: 10,
           bold: true,
           color: colors.navy,
           align: "center",
           valign: "middle",
-          fill: { color: colors.gold },
           margin: 0,
         });
 
@@ -957,17 +994,26 @@ export async function GET(
           line: { color: colors.border, pt: 0.5 },
         });
 
+        slide.addShape(ShapeType.roundRect, {
+          x: stepXs[i] + 0.84,
+          y: 2.18,
+          w: 0.66,
+          h: 0.42,
+          rectRadius: 0.16,
+          fill: { color: colors.gold },
+          line: { color: colors.gold, pt: 0 },
+        });
+
         slide.addText(String(i + 1), {
-          x: stepXs[i] + 0.87,
-          y: 2.22,
-          w: 0.6,
-          h: 0.32,
+          x: stepXs[i] + 0.84,
+          y: 2.25,
+          w: 0.66,
+          h: 0.18,
           fontSize: 13,
           bold: true,
           color: colors.navy,
           align: "center",
           valign: "middle",
-          fill: { color: colors.gold },
           margin: 0,
         });
 
