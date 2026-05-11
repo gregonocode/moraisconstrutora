@@ -9,7 +9,7 @@ import {
   type OrcamentoItemRow,
   type OrcamentoEtapaRow,
   type ClienteRow,
-} from "@/app/lib/orcamentos/export/get-orcamento-export-data"
+} from "@/app/lib/orcamentos/export/get-orcamento-export-data";
 
 const PptxGenJS = pptxgen;
 const ShapeType = {
@@ -967,7 +967,7 @@ export async function GET(
 
         slide.addText(titles[i] ?? `Passo ${i + 1}`, {
           x: stepXs[i] + 0.15,
-          y: 3.05,
+          y: 2.75,
           w: 2.05,
           h: 0.34,
           fontSize: 8.8,
@@ -976,12 +976,11 @@ export async function GET(
           align: "center",
           valign: "middle",
           margin: 0,
-          fit: "shrink",
         });
 
         slide.addText(item, {
           x: stepXs[i] + 0.12,
-          y: 3.48,
+          y: 3.18,
           w: 2.1,
           h: 0.62,
           fontSize: 7.4,
@@ -989,13 +988,12 @@ export async function GET(
           align: "center",
           valign: "middle",
           margin: 0.03,
-          fit: "shrink",
         });
       });
 
       slide.addShape(ShapeType.roundRect, {
         x: 4.25,
-        y: 4.85,
+        y: 4.65,
         w: 4.85,
         h: 0.48,
         rectRadius: 0.05,
@@ -1005,7 +1003,7 @@ export async function GET(
 
       slide.addText("Solicitar Aprovação da Proposta", {
         x: 4.4,
-        y: 5.02,
+        y: 4.82,
         w: 4.55,
         h: 0.14,
         fontSize: 9,
