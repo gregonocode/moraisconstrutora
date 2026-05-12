@@ -106,6 +106,8 @@ type OrcamentoEtapaRow = {
 };
 
 export async function GET(_request: Request, context: RouteContext) {
+  console.time("[PDF] total");
+
   try {
     const { id } = await context.params;
     const supabase = await createClient();
@@ -116,6 +118,7 @@ export async function GET(_request: Request, context: RouteContext) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.timeEnd("[PDF] total");
       return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
     }
 
@@ -126,6 +129,7 @@ export async function GET(_request: Request, context: RouteContext) {
       .maybeSingle();
 
     if (usuarioError) {
+      console.timeEnd("[PDF] total");
       return NextResponse.json(
         { error: `Erro ao buscar usuário interno: ${usuarioError.message}` },
         { status: 500 }
@@ -133,6 +137,7 @@ export async function GET(_request: Request, context: RouteContext) {
     }
 
     if (!usuarioRow) {
+      console.timeEnd("[PDF] total");
       return NextResponse.json(
         { error: "Usuário interno não encontrado." },
         { status: 404 }
@@ -141,6 +146,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
     const userId = usuarioRow.id as string;
 
+    console.time("[PDF] supabase queries");
     const [
       { data: orcamentoData, error: orcamentoError },
       { data: itensData, error: itensError },
@@ -238,8 +244,10 @@ export async function GET(_request: Request, context: RouteContext) {
         .eq("user_id", userId)
         .order("ordem", { ascending: true }),
     ]);
+    console.timeEnd("[PDF] supabase queries");
 
     if (orcamentoError) {
+      console.timeEnd("[PDF] total");
       return NextResponse.json(
         { error: `Erro ao carregar orçamento: ${orcamentoError.message}` },
         { status: 500 }
@@ -247,6 +255,7 @@ export async function GET(_request: Request, context: RouteContext) {
     }
 
     if (itensError) {
+      console.timeEnd("[PDF] total");
       return NextResponse.json(
         { error: `Erro ao carregar itens: ${itensError.message}` },
         { status: 500 }
@@ -254,6 +263,7 @@ export async function GET(_request: Request, context: RouteContext) {
     }
 
     if (etapasError) {
+      console.timeEnd("[PDF] total");
       return NextResponse.json(
         { error: `Erro ao carregar etapas: ${etapasError.message}` },
         { status: 500 }
@@ -261,6 +271,7 @@ export async function GET(_request: Request, context: RouteContext) {
     }
 
     if (!orcamentoData) {
+      console.timeEnd("[PDF] total");
       return NextResponse.json(
         { error: "Orçamento não encontrado." },
         { status: 404 }
@@ -273,8 +284,11 @@ export async function GET(_request: Request, context: RouteContext) {
     const cliente = orcamento.cliente?.[0] ?? null;
     const valorTotal = Number(orcamento.valor_total ?? 0);
 
+    console.time("[PDF] load logo");
     const logoDataUrl = await loadLogoDataUrl();
+    console.timeEnd("[PDF] load logo");
 
+    console.time("[PDF] build html");
     const html = buildProposalHtml({
       orcamento,
       cliente,
@@ -284,30 +298,52 @@ export async function GET(_request: Request, context: RouteContext) {
       responsavelNome: usuarioRow.nome ?? "Usuário",
       logoDataUrl,
     });
+    console.timeEnd("[PDF] build html");
 
     const isLocal = process.env.NODE_ENV !== "production";
+    console.time("[PDF] chromium executable");
+    const executablePath = isLocal
+      ? process.env.PUPPETEER_EXECUTABLE_PATH || undefined
+      : await chromium.executablePath();
+    console.timeEnd("[PDF] chromium executable");
 
+    const chromiumHeadless =
+      "headless" in chromium
+        ? (chromium as typeof chromium & { headless: true | "shell" }).headless
+        : "shell";
+
+    console.time("[PDF] launch browser");
     const browser = await puppeteer.launch({
       args: isLocal
         ? puppeteer.defaultArgs()
-        : puppeteer.defaultArgs({
-            args: chromium.args,
-            headless: "shell",
-          }),
+        : [
+            ...chromium.args,
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--font-render-hinting=none",
+          ],
       defaultViewport: viewport,
-      executablePath: isLocal
-        ? process.env.PUPPETEER_EXECUTABLE_PATH || undefined
-        : await chromium.executablePath(),
-      headless: isLocal ? true : "shell",
+      executablePath,
+      headless: isLocal ? true : chromiumHeadless,
     });
+    console.timeEnd("[PDF] launch browser");
 
     try {
+      console.time("[PDF] new page");
       const page = await browser.newPage();
+      console.timeEnd("[PDF] new page");
 
+      console.time("[PDF] set content");
       await page.setContent(html, {
-        waitUntil: "networkidle0",
+        waitUntil: "domcontentloaded",
+        timeout: 15000,
       });
+      await page.emulateMediaType("screen");
+      console.timeEnd("[PDF] set content");
 
+      console.time("[PDF] body height");
       const bodyHeight = await page.evaluate(() => {
         const body = document.body;
         const html = document.documentElement;
@@ -322,7 +358,10 @@ export async function GET(_request: Request, context: RouteContext) {
           )
         );
       });
+      console.timeEnd("[PDF] body height");
+      console.log("[PDF] bodyHeight:", bodyHeight);
 
+      console.time("[PDF] page pdf");
       const pdf = await page.pdf({
         width: "210mm",
         height: `${bodyHeight}px`,
@@ -335,11 +374,13 @@ export async function GET(_request: Request, context: RouteContext) {
           left: "0mm",
         },
       });
+      console.timeEnd("[PDF] page pdf");
 
       const filename = sanitizeFilename(
         `${orcamento.codigo ?? "orcamento"}-${orcamento.titulo}.pdf`
       );
       const pdfBytes = Uint8Array.from(pdf);
+      console.timeEnd("[PDF] total");
 
       return new NextResponse(pdfBytes, {
         status: 200,
@@ -350,9 +391,18 @@ export async function GET(_request: Request, context: RouteContext) {
         },
       });
     } finally {
+      console.time("[PDF] close browser");
       await browser.close();
+      console.timeEnd("[PDF] close browser");
     }
   } catch (error) {
+    console.error("[PDF] ERRO AO GERAR PDF:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : null,
+      name: error instanceof Error ? error.name : null,
+    });
+    console.timeEnd("[PDF] total");
+
     const message =
       error instanceof Error ? error.message : "Erro interno ao gerar PDF.";
 
